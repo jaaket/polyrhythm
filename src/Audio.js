@@ -1,12 +1,9 @@
 "use strict";
 
-exports.initContext = function(foo) {
-  console.log("foo");
-  return new (window.AudioContext || window.webkitAudioContext)();
-}
+var ctx = new (window.AudioContext || window.webkitAudioContext)();
 
-exports.play = function(ctx) {
-  return function(data) {
+exports.play = function(data) {
+  return function() {
     ctx.decodeAudioData(data, function(buffer) {
       var source = ctx.createBufferSource();
       source.connect(ctx.destination);

@@ -6,12 +6,11 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Events.Forms as HF
 import Halogen.HTML.Properties as HP
-import Audio (initContext, play)
+import Audio (AUDIO, play)
 import Control.Monad.Aff (Aff, later')
-import Control.Monad.Aff.Free (fromAff)
+import Control.Monad.Aff.Free (fromAff, fromEff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
-import DOM.File.Types (Blob)
 import Data.Array (range)
 import Data.ArrayBuffer.Types (ArrayBuffer)
 import Data.Int (fromString)
@@ -26,17 +25,16 @@ import Network.HTTP.Affjax (get, AJAX)
 lcm :: Int -> Int -> Int
 lcm a b = (a * b) / gcd (Ratio a b)
 
-type SoundContext =
-  { ctx :: Blob
-  , metronome :: ArrayBuffer
+type Sounds =
+  { metronome :: ArrayBuffer
   , kick :: ArrayBuffer
   , snare :: ArrayBuffer
   }
 
-type State = { a :: Int, b :: Int, soundCtx :: Maybe SoundContext, phase :: Int }
+type State = { a :: Int, b :: Int, sounds :: Maybe Sounds, phase :: Int }
 
 initialState :: State
-initialState = { a: 3, b: 4, soundCtx: Nothing, phase: 0 }
+initialState = { a: 3, b: 4, sounds: Nothing, phase: 0 }
 
 data Query a
   = Init a
@@ -44,7 +42,7 @@ data Query a
   | UpdateB String a
   | Tick a
 
-ui :: forall eff. H.Component State Query (Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX | eff)))
+ui :: forall eff. H.Component State Query (Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO | eff)))
 ui = H.component { render, eval }
   where
 
@@ -63,12 +61,12 @@ ui = H.component { render, eval }
         ]
       ]
 
-  eval :: Query ~> H.ComponentDSL State Query (Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX | eff)))
+  eval :: Query ~> H.ComponentDSL State Query (Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO | eff)))
   eval (Init next) = do
     metronome <- fromAff $ get "sounds/metronome.wav"
     kick <- fromAff $ get "sounds/kick.wav"
     snare <- fromAff $ get "sounds/snare.wav"
-    H.modify (\state -> state { soundCtx = Just { ctx: initContext 5, metronome: metronome.response, kick: kick.response, snare: snare.response } })
+    H.modify (\state -> state { sounds = Just { metronome: metronome.response, kick: kick.response, snare: snare.response } })
     pure next
   eval (UpdateA aStr next) = do
     H.modify (\state -> state { a = fromMaybe state.a (fromString aStr) })
@@ -78,14 +76,10 @@ ui = H.component { render, eval }
     pure next
   eval (Tick next) = do
     state <- H.get
-    case state.soundCtx of
-      Just soundCtx -> do
-        if state.phase `mod` state.a == 0
-          then pure (play soundCtx.ctx soundCtx.kick)
-          else pure unit
-        if state.phase `mod` state.b == 0
-          then pure (play soundCtx.ctx soundCtx.snare)
-          else pure unit
+    fromEff $ case state.sounds of
+      Just sounds -> do
+        when (state.phase `mod` state.a == 0) (play sounds.kick)
+        when (state.phase `mod` state.b == 0) (play sounds.snare)
       Nothing -> pure unit
     H.modify (\s -> s { phase = s.phase + 1 })
     pure next
@@ -101,7 +95,7 @@ renderRepeat cycle total = HH.tr_ $
     (\i -> HH.td [ HP.class_ (className (if i `mod` cycle == 0 then "on" else "off")) ] [])
     (range 0 (total - 1))
 
-main :: forall eff. Eff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX | eff)) Unit
+main :: Eff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO)) Unit
 main = runHalogenAff do
   body <- awaitBody
   driver <- H.runUI ui initialState body

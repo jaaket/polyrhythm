@@ -3,8 +3,9 @@ module Audio where
 import Prelude
 import DOM.File.Types (Blob)
 import Data.ArrayBuffer.Types (ArrayBuffer)
+import Control.Monad.Eff
 
 
-foreign import initContext :: Int -> Blob
+foreign import data AUDIO :: !
 
-foreign import play :: Blob -> ArrayBuffer -> Unit
+foreign import play :: forall e. ArrayBuffer -> Eff (audio :: AUDIO | e) Unit
