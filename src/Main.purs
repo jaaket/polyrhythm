@@ -6,14 +6,14 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Events.Forms as HF
 import Halogen.HTML.Properties as HP
-import Audio (AUDIO, play)
+import Audio (AUDIO, Sample, loadSample, play)
 import Control.Monad.Aff (Aff, later')
 import Control.Monad.Aff.Console (log)
+import Control.Parallel (parallel, sequential)
 import Control.Monad.Aff.Free (fromAff, fromEff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import Data.Array (range)
-import Data.ArrayBuffer.Types (ArrayBuffer)
 import Data.Int (fromString)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Ratio (Ratio(..), gcd)
@@ -27,15 +27,15 @@ lcm :: Int -> Int -> Int
 lcm a b = (a * b) / gcd (Ratio a b)
 
 type Sounds =
-  { metronome :: ArrayBuffer
-  , kick :: ArrayBuffer
-  , snare :: ArrayBuffer
+  { metronome :: Sample
+  , kick :: Sample
+  , snare :: Sample
   }
 
 type State = { a :: Int, b :: Int, sounds :: Maybe Sounds, phase :: Int, tempo :: Int }
 
 initialState :: State
-initialState = { a: 3, b: 4, sounds: Nothing, phase: 0, tempo: 80 }
+initialState = { a: 3, b: 4, sounds: Nothing, phase: 0, tempo: 120 }
 
 data Query a
   = Init a
@@ -73,10 +73,15 @@ ui = H.component { render, eval }
 
   eval :: Query ~> H.ComponentDSL State Query (Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO | eff)))
   eval (Init next) = do
-    metronome <- fromAff $ get "sounds/metronome.wav"
-    kick <- fromAff $ get "sounds/kick.wav"
-    snare <- fromAff $ get "sounds/snare.wav"
-    H.modify (\state -> state { sounds = Just { metronome: metronome.response, kick: kick.response, snare: snare.response } })
+    samples <- fromAff $ sequential $
+      (\m k s -> { metronome: m.response, kick: k.response, snare: s.response })
+        <$> parallel (get "sounds/metronome.wav")
+        <*> parallel (get "sounds/kick.wav")
+        <*> parallel (get "sounds/snare.wav")
+    metronome <- fromAff (loadSample samples.metronome)
+    kick <- fromAff (loadSample samples.kick)
+    snare <- fromAff (loadSample samples.snare)
+    H.modify (\state -> state { sounds = Just { metronome: metronome, kick: kick, snare: snare } })
     pure next
   eval (UpdateA aStr next) = do
     H.modify (\state -> state { a = fromMaybe state.a (fromString aStr) })
