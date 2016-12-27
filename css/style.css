@@ -30,6 +30,23 @@ input {
   font: 2em sans-serif;
 }
 
+.tempo {
+  margin: 20px auto;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+}
+
+button {
+  width: 50px;
+  height: 50px;
+  margin: 10px;
+  text-align: center;
+  font: 1.3em sans-serif;
+  background: none;
+  border: none;
+}
+
 .on {
   background-color: #4050AF;
 }

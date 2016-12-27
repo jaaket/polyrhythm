@@ -42,6 +42,8 @@ data Query a
   | UpdateA String a
   | UpdateB String a
   | UpdateTempo String a
+  | DecrTempo a
+  | IncrTempo a
   | Tick a
   | AskTempo (Int -> a)
 
@@ -53,8 +55,11 @@ ui = H.component { render, eval }
   render state =
     HH.div [ HP.class_ (className "main") ]
       [ HH.div_
-        [ HH.div [ HP.class_ (className "inputs") ]
-            [ HH.input [ HF.onValueInput (HE.input UpdateTempo), HP.placeholder (show state.tempo) ] ]
+        [ HH.div [ HP.class_ (className "tempo") ]
+            [ HH.button [ HE.onClick (HE.input_ DecrTempo) ] [ HH.text "−10" ]
+            , HH.input [ HF.onValueInput (HE.input UpdateTempo), HP.placeholder (show state.tempo) ]
+            , HH.button [ HE.onClick (HE.input_ IncrTempo) ] [ HH.text "+10" ]
+            ]
         , HH.table_
             [ renderRepeat state.a (lcm state.a state.b)
             , renderRepeat state.b (lcm state.a state.b)
@@ -82,6 +87,12 @@ ui = H.component { render, eval }
   eval (UpdateTempo tempo next) = do
     H.modify (\state -> state { tempo = fromMaybe state.tempo (fromString tempo) })
     fromAff $ log tempo
+    pure next
+  eval (DecrTempo next) = do
+    H.modify (\state -> state { tempo = state.tempo - 10 })
+    pure next
+  eval (IncrTempo next) = do
+    H.modify (\state -> state { tempo = state.tempo + 10 })
     pure next
   eval (Tick next) = do
     state <- H.get
