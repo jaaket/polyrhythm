@@ -1,20 +1,21 @@
 module Main where
 
 import Prelude
+import RequestAnimationFrame
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Events.Forms as HF
 import Halogen.HTML.Properties as HP
 import Audio (AUDIO, Sample, loadSample, play)
-import Control.Monad.Aff (Aff, later')
+import Control.Monad.Aff (Aff)
 import Control.Monad.Aff.Console (log)
-import Control.Parallel (parallel, sequential)
 import Control.Monad.Aff.Free (fromAff, fromEff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
+import Control.Parallel (parallel, sequential)
 import Data.Array (range)
-import Data.Int (fromString)
+import Data.Int (fromString, toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Ratio (Ratio(..), gcd)
 import Halogen (Driver, action, request)
@@ -45,7 +46,7 @@ data Query a
   | DecrTempo a
   | IncrTempo a
   | Tick a
-  | AskTempo (Int -> a)
+  | AskTempo (Number -> a)
 
 ui :: forall eff. H.Component State Query (Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO | eff)))
 ui = H.component { render, eval }
@@ -110,15 +111,19 @@ ui = H.component { render, eval }
     pure next
   eval (AskTempo k) = do
     state <- H.get
-    pure (k (60000 / state.tempo / state.a))
+    pure (k (60000.0 / toNumber state.tempo / toNumber state.a))
 
-mainLoop :: forall e. Driver Query e -> Aff (H.HalogenEffects e) Unit
-mainLoop driver = loop
+mainLoop :: forall e. Driver Query (console :: CONSOLE | e) -> Aff (H.HalogenEffects (console :: CONSOLE | e)) Unit
+mainLoop driver = loop 0.0
   where
-    loop = do
-      driver (action Tick)
+    loop lastTick = do
       tempo <- driver (request AskTempo)
-      later' tempo loop
+      requestAnimationFrame \time -> do
+        if time - lastTick > tempo
+          then do
+            driver (action Tick)
+            loop time
+          else loop lastTick
 
 renderRepeat :: forall a. Int -> Int -> Int -> H.ComponentHTML a
 renderRepeat phase cycle total = HH.tr_ $
