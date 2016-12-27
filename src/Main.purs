@@ -61,8 +61,8 @@ ui = H.component { render, eval }
             , HH.button [ HE.onClick (HE.input_ IncrTempo) ] [ HH.text "+10" ]
             ]
         , HH.table_
-            [ renderRepeat state.a (lcm state.a state.b)
-            , renderRepeat state.b (lcm state.a state.b)
+            [ renderRepeat state.phase state.a (lcm state.a state.b)
+            , renderRepeat state.phase state.b (lcm state.a state.b)
             ]
         , HH.div [ HP.class_ (className "inputs") ]
             [ HH.input [ HF.onValueInput (HE.input UpdateA), HP.placeholder (show state.a) ]
@@ -120,10 +120,14 @@ mainLoop driver = loop
       tempo <- driver (request AskTempo)
       later' tempo loop
 
-renderRepeat :: forall a. Int -> Int -> H.ComponentHTML a
-renderRepeat cycle total = HH.tr_ $
+renderRepeat :: forall a. Int -> Int -> Int -> H.ComponentHTML a
+renderRepeat phase cycle total = HH.tr_ $
   map
-    (\i -> HH.td [ HP.class_ (className (if i `mod` cycle == 0 then "on" else "off")) ] [])
+    (\i -> HH.td
+        [ HP.classes $
+            [ className (if i `mod` cycle == 0 then "on" else "off") ]
+            <> if (phase - 1) `mod` total == i then [ className "playing" ] else []
+        ] [])
     (range 0 (total - 1))
 
 main :: Eff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO)) Unit

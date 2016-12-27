@@ -54,3 +54,17 @@ button {
 .off {
   background-color: #DDDDDD;
 }
+
+.playing {
+  animation-duration: 500ms;
+  animation-name: pulse;
+}
+
+@keyframes pulse {
+  0% {
+    background-color: #EEFAFF;
+  }
+
+  100% {
+  }
+}
