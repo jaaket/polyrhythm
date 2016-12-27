@@ -1,0 +1,39 @@
+table {
+    text-align: center;
+}
+
+tr {
+  height: 50px;
+}
+
+td {
+  width: 50px;
+}
+
+.main {
+  margin: 40px auto;
+  display: flex;
+  justify-content: center;
+}
+
+.inputs {
+  margin: 20px auto;
+  display: flex;
+  justify-content: center;
+}
+
+input {
+  width: 60px;
+  height: 60px;
+  margin: 10px;
+  text-align: center;
+  font: 2em sans-serif;
+}
+
+.on {
+  background-color: #4050AF;
+}
+
+.off {
+  background-color: #DDDDDD;
+}
