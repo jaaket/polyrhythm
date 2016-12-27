@@ -104,14 +104,14 @@ ui = H.component { render, eval }
     state <- H.get
     fromEff $ case state.sounds of
       Just sounds -> do
-        when (state.phase `mod` state.a == 0) (play sounds.kick)
-        when (state.phase `mod` state.b == 0) (play sounds.metronome)
+        when (state.phase `mod` (lcm state.a state.b / state.a) == 0) (play sounds.kick)
+        when (state.phase `mod` (lcm state.a state.b / state.b) == 0) (play sounds.metronome)
       Nothing -> pure unit
     H.modify (\s -> s { phase = s.phase + 1 })
     pure next
   eval (AskTempo k) = do
     state <- H.get
-    pure (k (60000.0 / toNumber state.tempo / toNumber state.a))
+    pure (k (60000.0 / toNumber state.tempo / toNumber (lcm state.a state.b / state.a)))
 
 mainLoop :: forall e. Driver Query (console :: CONSOLE | e) -> Aff (H.HalogenEffects (console :: CONSOLE | e)) Unit
 mainLoop driver = loop 0.0
@@ -130,7 +130,7 @@ renderRepeat phase cycle total = HH.tr_ $
   map
     (\i -> HH.td
         [ HP.classes $
-            [ className (if i `mod` cycle == 0 then "on" else "off") ]
+            [ className (if i `mod` (total / cycle) == 0 then "on" else "off") ]
             <> if (phase - 1) `mod` total == i then [ className "playing" ] else []
         ] [])
     (range 0 (total - 1))
