@@ -2,6 +2,8 @@ module Main where
 
 import Prelude
 import RequestAnimationFrame
+import Data.Lens
+import Data.Lens.Index
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -14,9 +16,10 @@ import Control.Monad.Aff.Free (fromAff, fromEff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import Control.Parallel (parallel, sequential)
-import Data.Array (range)
+import DOM.HTML.Event.EventTypes (open)
+import Data.Array (range, (!!), length)
 import Data.Int (fromString, toNumber)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Ratio (Ratio(..), gcd)
 import Halogen (Driver, action, request)
 import Halogen.HTML.Core (className)
@@ -33,10 +36,25 @@ type Sounds =
   , snare :: Sample
   }
 
-type State = { a :: Int, b :: Int, sounds :: Maybe Sounds, phase :: Int, tempo :: Int }
+type State = { a :: Int, b :: Int, notes :: Array (Array Boolean), numNotes :: Int, sounds :: Maybe Sounds, phase :: Int, tempo :: Int }
 
 initialState :: State
-initialState = { a: 3, b: 4, sounds: Nothing, phase: 0, tempo: 120 }
+initialState = { a: 3, b: 4, notes: [], numNotes: 0, sounds: Nothing, phase: 0, tempo: 120 }
+
+isNoteOn :: State -> Int -> Int -> Boolean
+isNoteOn state row column =
+  case state.notes ^? ix row <<< ix column of
+    Just true -> true
+    _ -> false
+
+generatePolyrhythm :: Int -> Int -> Array (Array Boolean)
+generatePolyrhythm a b =
+  [ map (\i -> i `mod` (lcm a b / a) == 0) (range 0 (lcm a b - 1))
+  , map (\i -> i `mod` (lcm a b / b) == 0) (range 0 (lcm a b - 1))
+  ]
+
+toggleNote :: Int -> Int -> Array (Array Boolean) -> Array (Array Boolean)
+toggleNote row column = ix row <<< ix column %~ not
 
 data Query a
   = Init a
@@ -47,6 +65,7 @@ data Query a
   | IncrTempo a
   | Tick a
   | AskTempo (Number -> a)
+  | ClickCell Int Int a
 
 ui :: forall eff. H.Component State Query (Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO | eff)))
 ui = H.component { render, eval }
@@ -62,8 +81,8 @@ ui = H.component { render, eval }
             , HH.button [ HE.onClick (HE.input_ IncrTempo) ] [ HH.text "+10" ]
             ]
         , HH.table_
-            [ renderRepeat state.phase state.a (lcm state.a state.b)
-            , renderRepeat state.phase state.b (lcm state.a state.b)
+            [ renderNotes 0 state
+            , renderNotes 1 state
             ]
         , HH.div [ HP.class_ (className "inputs") ]
             [ HH.input [ HF.onValueInput (HE.input UpdateA), HP.placeholder (show state.a) ]
@@ -77,18 +96,24 @@ ui = H.component { render, eval }
     samples <- fromAff $ sequential $
       (\m k s -> { metronome: m.response, kick: k.response, snare: s.response })
         <$> parallel (get "sounds/metronome.wav")
-        <*> parallel (get "sounds/kick.wav")
-        <*> parallel (get "sounds/snare.wav")
+        <*> parallel (get "sounds/bd01.wav")
+        <*> parallel (get "sounds/sd03.wav")
     metronome <- fromAff (loadSample samples.metronome)
     kick <- fromAff (loadSample samples.kick)
     snare <- fromAff (loadSample samples.snare)
-    H.modify (\state -> state { sounds = Just { metronome: metronome, kick: kick, snare: snare } })
+    H.modify (\state -> state
+      { sounds = Just { metronome: metronome, kick: kick, snare: snare }
+      , notes = generatePolyrhythm 3 4
+      , numNotes = lcm 3 4
+      })
     pure next
   eval (UpdateA aStr next) = do
     H.modify (\state -> state { a = fromMaybe state.a (fromString aStr) })
+    H.modify (\state -> state { notes = generatePolyrhythm state.a state.b, numNotes = lcm state.a state.b })
     pure next
   eval (UpdateB bStr next) = do
     H.modify (\state -> state { b = fromMaybe state.b (fromString bStr) })
+    H.modify (\state -> state { notes = generatePolyrhythm state.a state.b, numNotes = lcm state.a state.b })
     pure next
   eval (UpdateTempo tempo next) = do
     H.modify (\state -> state { tempo = fromMaybe state.tempo (fromString tempo) })
@@ -104,36 +129,43 @@ ui = H.component { render, eval }
     state <- H.get
     fromEff $ case state.sounds of
       Just sounds -> do
-        when (state.phase `mod` (lcm state.a state.b / state.a) == 0) (play sounds.kick)
-        when (state.phase `mod` (lcm state.a state.b / state.b) == 0) (play sounds.metronome)
+        when (isNoteOn state 0 (state.phase `mod` state.numNotes)) (play sounds.kick)
+        when (isNoteOn state 1 (state.phase `mod` state.numNotes)) (play sounds.snare)
       Nothing -> pure unit
     H.modify (\s -> s { phase = s.phase + 1 })
     pure next
   eval (AskTempo k) = do
     state <- H.get
-    pure (k (60000.0 / toNumber state.tempo / toNumber (lcm state.a state.b / state.a)))
+    pure (k (60000.0 / toNumber state.tempo / (toNumber (lcm state.a state.b) / toNumber state.a)))
+  eval (ClickCell row column next) = do
+    H.modify \state -> state { notes = toggleNote row column state.notes }
+    pure next
 
 mainLoop :: forall e. Driver Query (console :: CONSOLE | e) -> Aff (H.HalogenEffects (console :: CONSOLE | e)) Unit
 mainLoop driver = loop 0.0
   where
     loop lastTick = do
       tempo <- driver (request AskTempo)
-      requestAnimationFrame \time -> do
-        if time - lastTick > tempo
-          then do
-            driver (action Tick)
-            loop time
-          else loop lastTick
+      requestAnimationFrame \time ->
+        let delta = time - lastTick
+        in  if delta > tempo
+              then do
+                driver (action Tick)
+                loop (time - delta `mod` tempo)
+              else loop lastTick
 
-renderRepeat :: forall a. Int -> Int -> Int -> H.ComponentHTML a
-renderRepeat phase cycle total = HH.tr_ $
+renderNotes :: Int -> State -> H.ComponentHTML Query
+renderNotes row state = HH.tr_ $
   map
     (\i -> HH.td
         [ HP.classes $
-            [ className (if i `mod` (total / cycle) == 0 then "on" else "off") ]
-            <> if (phase - 1) `mod` total == i then [ className "playing" ] else []
+            [ className $ case state.notes ^? ix row <<< ix i of
+                Just true -> "on"
+                _ -> "off" ]
+            <> if (state.phase - 1) `mod` state.numNotes == i then [ className "playing" ] else []
+        , HE.onClick (HE.input_ (ClickCell row i))
         ] [])
-    (range 0 (total - 1))
+    (range 0 (state.numNotes - 1))
 
 main :: Eff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO)) Unit
 main = runHalogenAff do
