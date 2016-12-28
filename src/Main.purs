@@ -3,7 +3,7 @@ module Main where
 import Prelude
 import RequestAnimationFrame
 import Data.Lens
-import Data.Lens.Index
+import Data.Lens.Index (ix)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -16,10 +16,9 @@ import Control.Monad.Aff.Free (fromAff, fromEff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import Control.Parallel (parallel, sequential)
-import DOM.HTML.Event.EventTypes (open)
-import Data.Array (range, (!!), length)
+import Data.Array (range)
 import Data.Int (fromString, toNumber)
-import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Ratio (Ratio(..), gcd)
 import Halogen (Driver, action, request)
 import Halogen.HTML.Core (className)
