@@ -20,8 +20,6 @@ import Data.Array (range)
 import Data.Int (fromString, toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Ratio (Ratio(..), gcd)
-import Halogen (Driver, action, request)
-import Halogen.HTML.Core (className)
 import Halogen.Util (awaitBody, runHalogenAff)
 import Network.HTTP.Affjax (get, AJAX)
 
@@ -72,9 +70,9 @@ ui = H.component { render, eval }
 
   render :: State -> H.ComponentHTML Query
   render state =
-    HH.div [ HP.class_ (className "main") ]
+    HH.div [ HP.class_ (HH.className "main") ]
       [ HH.div_
-        [ HH.div [ HP.class_ (className "tempo") ]
+        [ HH.div [ HP.class_ (HH.className "tempo") ]
             [ HH.button [ HE.onClick (HE.input_ DecrTempo) ] [ HH.text "−10" ]
             , HH.input [ HF.onValueInput (HE.input UpdateTempo), HP.placeholder (show state.tempo) ]
             , HH.button [ HE.onClick (HE.input_ IncrTempo) ] [ HH.text "+10" ]
@@ -83,7 +81,7 @@ ui = H.component { render, eval }
             [ renderNotes 0 state
             , renderNotes 1 state
             ]
-        , HH.div [ HP.class_ (className "inputs") ]
+        , HH.div [ HP.class_ (HH.className "inputs") ]
             [ HH.input [ HF.onValueInput (HE.input UpdateA), HP.placeholder (show state.a) ]
             , HH.input [ HF.onValueInput (HE.input UpdateB), HP.placeholder (show state.b) ]
             ]
@@ -140,16 +138,16 @@ ui = H.component { render, eval }
     H.modify \state -> state { notes = toggleNote row column state.notes }
     pure next
 
-mainLoop :: forall e. Driver Query (console :: CONSOLE | e) -> Aff (H.HalogenEffects (console :: CONSOLE | e)) Unit
+mainLoop :: forall e. H.Driver Query (console :: CONSOLE | e) -> Aff (H.HalogenEffects (console :: CONSOLE | e)) Unit
 mainLoop driver = loop 0.0
   where
     loop lastTick = do
-      tempo <- driver (request AskTempo)
+      tempo <- driver (H.request AskTempo)
       requestAnimationFrame \time ->
         let delta = time - lastTick
         in  if delta > tempo
               then do
-                driver (action Tick)
+                driver (H.action Tick)
                 loop (time - delta `mod` tempo)
               else loop lastTick
 
@@ -158,10 +156,10 @@ renderNotes row state = HH.tr_ $
   map
     (\i -> HH.td
         [ HP.classes $
-            [ className $ case state.notes ^? ix row <<< ix i of
+            [ HH.className $ case state.notes ^? ix row <<< ix i of
                 Just true -> "on"
                 _ -> "off" ]
-            <> if (state.phase - 1) `mod` state.numNotes == i then [ className "playing" ] else []
+            <> if (state.phase - 1) `mod` state.numNotes == i then [ HH.className "playing" ] else []
         , HE.onClick (HE.input_ (ClickCell row i))
         ] [])
     (range 0 (state.numNotes - 1))
@@ -170,5 +168,5 @@ main :: Eff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO)
 main = runHalogenAff do
   body <- awaitBody
   driver <- H.runUI ui initialState body
-  driver (action Init)
+  driver (H.action Init)
   mainLoop driver
