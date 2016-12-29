@@ -48,6 +48,7 @@ data Query a
   | Stop a
   | Play a
   | Pause a
+  | ClearNotes a
 
 type App eff = Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO | eff))
 
@@ -82,6 +83,8 @@ ui = H.parentComponent { render, eval, peek }
                 , HH.input [ HF.onValueInput (HE.input UpdateTempo), HP.placeholder (show state.tempo) ]
                 , HH.button [ HE.onClick (HE.input_ IncrTempo) ] [ HH.text "+10" ]
                 ]
+            , HH.i [ HE.onClick (HE.input_ ClearNotes)
+                   , HP.classes [ HH.className "control", HH.className "fa", HH.className "fa-trash-o", HH.className "fa-3x" ] ] []
             ]
         , HH.table_ $ map
             (\name ->
@@ -145,6 +148,9 @@ ui = H.parentComponent { render, eval, peek }
       case state.playState of
         Playing phase -> state { playState = Paused phase }
         _ -> state
+    pure next
+  eval (ClearNotes next) = do
+    sequence_ $ map (\name -> H.query (InstrumentSlot name) (H.action I.ClearNotes)) instruments
     pure next
 
   peek = Nothing

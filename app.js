@@ -30901,6 +30901,15 @@ var Reset = (function () {
     };
     return Reset;
 })();
+var ClearNotes = (function () {
+    function ClearNotes(value0) {
+        this.value0 = value0;
+    };
+    ClearNotes.create = function (value0) {
+        return new ClearNotes(value0);
+    };
+    return ClearNotes;
+})();
 var numNotes = function (state) {
     return Data_Array.length(state.notes);
 };
@@ -30930,7 +30939,7 @@ var ui = (function () {
                 if (!$8) {
                     return [  ];
                 };
-                throw new Error("Failed pattern match at Instrument line 49, column 20 - line 49, column 108: " + [ $8.constructor.name ]);
+                throw new Error("Failed pattern match at Instrument line 50, column 20 - line 50, column 108: " + [ $8.constructor.name ]);
             })())) ])(HalogenUtil.onMouseDownOrTouchStart(ToggleNote.create(i))))([  ]);
         })(Data_Array.range(0)(numNotes(state) - 1)));
     };
@@ -31004,7 +31013,21 @@ var ui = (function () {
                 return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
             });
         };
-        throw new Error("Failed pattern match at Instrument line 55, column 3 - line 60, column 14: " + [ v.constructor.name ]);
+        if (v instanceof ClearNotes) {
+            return Control_Bind.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (state) {
+                var $33 = {};
+                for (var $34 in state) {
+                    if (state.hasOwnProperty($34)) {
+                        $33[$34] = state[$34];
+                    };
+                };
+                $33.notes = Data_Array.replicate(Data_Array.length(state.notes))(false);
+                return $33;
+            }))(function () {
+                return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
+            });
+        };
+        throw new Error("Failed pattern match at Instrument line 56, column 3 - line 61, column 14: " + [ v.constructor.name ]);
     };
     return Halogen_Component.component({
         render: render, 
@@ -31016,6 +31039,7 @@ module.exports = {
     Tick: Tick, 
     ToggleNote: ToggleNote, 
     Reset: Reset, 
+    ClearNotes: ClearNotes, 
     isNoteOn: isNoteOn, 
     numNotes: numNotes, 
     ui: ui
@@ -31159,6 +31183,15 @@ var Pause = (function () {
     };
     return Pause;
 })();
+var ClearNotes = (function () {
+    function ClearNotes(value0) {
+        this.value0 = value0;
+    };
+    ClearNotes.create = function (value0) {
+        return new ClearNotes(value0);
+    };
+    return ClearNotes;
+})();
 var Stopped = (function () {
     function Stopped() {
 
@@ -31189,15 +31222,15 @@ var InstrumentSlot = function (x) {
 };
 var mainLoop = function (driver) {
     var loop = function (lastTick) {
-        return Control_Bind.bind(Control_Monad_Aff.bindAff)(driver(Halogen_Query.request(function ($83) {
-            return Data_Functor_Coproduct.left(AskTempo.create($83));
+        return Control_Bind.bind(Control_Monad_Aff.bindAff)(driver(Halogen_Query.request(function ($84) {
+            return Data_Functor_Coproduct.left(AskTempo.create($84));
         })))(function (v) {
             return RequestAnimationFrame.requestAnimationFrame(function (time) {
                 var delta = time - lastTick;
                 var $19 = delta > v;
                 if ($19) {
-                    return Control_Bind.bind(Control_Monad_Aff.bindAff)(driver(Halogen_Query.action(function ($84) {
-                        return Data_Functor_Coproduct.left(Tick.create($84));
+                    return Control_Bind.bind(Control_Monad_Aff.bindAff)(driver(Halogen_Query.action(function ($85) {
+                        return Data_Functor_Coproduct.left(Tick.create($85));
                     })))(function () {
                         return loop(time - Data_EuclideanRing.mod(Data_EuclideanRing.euclideanRingNumber)(delta)(v));
                     });
@@ -31205,7 +31238,7 @@ var mainLoop = function (driver) {
                 if (!$19) {
                     return loop(lastTick);
                 };
-                throw new Error("Failed pattern match at Main line 159, column 13 - line 163, column 33: " + [ $19.constructor.name ]);
+                throw new Error("Failed pattern match at Main line 165, column 13 - line 169, column 33: " + [ $19.constructor.name ]);
             });
         });
     };
@@ -31236,7 +31269,7 @@ var ui = (function () {
                 return Halogen_HTML_Elements.i([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(Pause.create)), Halogen_HTML_Properties.classes([ Halogen_HTML_Core.className("control"), Halogen_HTML_Core.className("fa"), Halogen_HTML_Core.className("fa-pause"), Halogen_HTML_Core.className("fa-3x") ]) ])([  ]);
             };
             return Halogen_HTML_Elements.i([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(Play.create)), Halogen_HTML_Properties.classes([ Halogen_HTML_Core.className("control"), Halogen_HTML_Core.className("fa"), Halogen_HTML_Core.className("fa-play"), Halogen_HTML_Core.className("fa-3x") ]) ])([  ]);
-        })() ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("tempo")) ])([ Halogen_HTML_Elements.button([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(DecrTempo.create)) ])([ Halogen_HTML.text("\u221210") ]), Halogen_HTML_Elements.input([ Halogen_HTML_Events_Forms.onValueInput(Halogen_HTML_Events.input(UpdateTempo.create)), Halogen_HTML_Properties.placeholder(Data_Show.show(Data_Show.showInt)(state.tempo)) ]), Halogen_HTML_Elements.button([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(IncrTempo.create)) ])([ Halogen_HTML.text("+10") ]) ]) ]), Halogen_HTML_Elements.table_(Data_Functor.map(Data_Functor.functorArray)(function (name) {
+        })() ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("tempo")) ])([ Halogen_HTML_Elements.button([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(DecrTempo.create)) ])([ Halogen_HTML.text("\u221210") ]), Halogen_HTML_Elements.input([ Halogen_HTML_Events_Forms.onValueInput(Halogen_HTML_Events.input(UpdateTempo.create)), Halogen_HTML_Properties.placeholder(Data_Show.show(Data_Show.showInt)(state.tempo)) ]), Halogen_HTML_Elements.button([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(IncrTempo.create)) ])([ Halogen_HTML.text("+10") ]) ]), Halogen_HTML_Elements.i([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(ClearNotes.create)), Halogen_HTML_Properties.classes([ Halogen_HTML_Core.className("control"), Halogen_HTML_Core.className("fa"), Halogen_HTML_Core.className("fa-trash-o"), Halogen_HTML_Core.className("fa-3x") ]) ])([  ]) ]), Halogen_HTML_Elements.table_(Data_Functor.map(Data_Functor.functorArray)(function (name) {
             return Halogen_HTML.slot(name)(function (v) {
                 return {
                     component: Instrument.ui, 
@@ -31341,7 +31374,7 @@ var ui = (function () {
                             });
                         });
                     };
-                    throw new Error("Failed pattern match at Main line 116, column 5 - line 121, column 63: " + [ v1.playState.constructor.name ]);
+                    throw new Error("Failed pattern match at Main line 119, column 5 - line 124, column 63: " + [ v1.playState.constructor.name ]);
                 })())(function () {
                     return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
                 });
@@ -31361,7 +31394,7 @@ var ui = (function () {
                     if (v1.sample instanceof Data_Maybe.Nothing) {
                         return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(Data_Unit.unit);
                     };
-                    throw new Error("Failed pattern match at Main line 128, column 5 - line 130, column 27: " + [ v1.sample.constructor.name ]);
+                    throw new Error("Failed pattern match at Main line 131, column 5 - line 133, column 27: " + [ v1.sample.constructor.name ]);
                 })())(function () {
                     return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
                 });
@@ -31410,7 +31443,7 @@ var ui = (function () {
                 if (state.playState instanceof Playing) {
                     return state;
                 };
-                throw new Error("Failed pattern match at Main line 138, column 7 - line 141, column 27: " + [ state.playState.constructor.name ]);
+                throw new Error("Failed pattern match at Main line 141, column 7 - line 144, column 27: " + [ state.playState.constructor.name ]);
             }))(function () {
                 return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
             });
@@ -31432,7 +31465,14 @@ var ui = (function () {
                 return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
             });
         };
-        throw new Error("Failed pattern match at Main line 97, column 3 - line 103, column 14: " + [ v.constructor.name ]);
+        if (v instanceof ClearNotes) {
+            return Control_Bind.bind(Control_Monad_Free.freeBind)(Data_Foldable.sequence_(Control_Monad_Free.freeApplicative)(Data_Foldable.foldableArray)(Data_Functor.map(Data_Functor.functorArray)(function (name) {
+                return Halogen_Component.query(Control_Monad_Aff.functorAff)(ordInstrumentSlot)(name)(Halogen_Query.action(Instrument.ClearNotes.create));
+            })(instruments)))(function () {
+                return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
+            });
+        };
+        throw new Error("Failed pattern match at Main line 100, column 3 - line 106, column 14: " + [ v.constructor.name ]);
     };
     return Halogen_Component.parentComponent(Control_Monad_Aff.functorAff)(ordInstrumentSlot)({
         render: render, 
@@ -31442,8 +31482,8 @@ var ui = (function () {
 })();
 var main = Halogen_Util.runHalogenAff(Control_Bind.bind(Control_Monad_Aff.bindAff)(Halogen_Util.awaitBody)(function (v) {
     return Control_Bind.bind(Control_Monad_Aff.bindAff)(Halogen_Driver.runUI(ui)(initialState)(v))(function (v1) {
-        return Control_Bind.bind(Control_Monad_Aff.bindAff)(v1(Halogen_Query.action(function ($85) {
-            return Data_Functor_Coproduct.left(Init.create($85));
+        return Control_Bind.bind(Control_Monad_Aff.bindAff)(v1(Halogen_Query.action(function ($86) {
+            return Data_Functor_Coproduct.left(Init.create($86));
         })))(function () {
             return mainLoop(v1);
         });
@@ -31464,6 +31504,7 @@ module.exports = {
     Stop: Stop, 
     Play: Play, 
     Pause: Pause, 
+    ClearNotes: ClearNotes, 
     initialState: initialState, 
     instruments: instruments, 
     main: main, 

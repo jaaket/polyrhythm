@@ -9,7 +9,7 @@ import Halogen.HTML.Properties as HP
 import Control.Monad.Aff (Aff)
 import Control.Monad.Aff.Console (CONSOLE)
 import Control.Monad.Aff.Free (fromEff, fromAff)
-import Data.Array (length, range)
+import Data.Array (length, range, replicate)
 import Data.Lens.Index (ix)
 import Data.Maybe (Maybe(..))
 import HalogenUtil (onMouseDownOrTouchStart)
@@ -32,6 +32,7 @@ data Query a
   | Tick a
   | ToggleNote Int a
   | Reset a
+  | ClearNotes a
 
 ui :: forall eff. H.Component State Query (Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO | eff)))
 ui = H.component { render, eval }
@@ -71,4 +72,7 @@ ui = H.component { render, eval }
     pure next
   eval (Reset next) = do
     H.modify \state -> state { phase = 0 }
+    pure next
+  eval (ClearNotes next) = do
+    H.modify \state -> state { notes = replicate (length state.notes) false }
     pure next
