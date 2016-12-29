@@ -55,8 +55,12 @@ type App eff = Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio ::
 type State' g = H.ParentState State I.State Query I.Query g InstrumentSlot
 type Query' = Coproduct Query (H.ChildF InstrumentSlot I.Query)
 
-instruments :: Array String
-instruments = ["sounds/kick.wav", "sounds/snare.wav", "sounds/metronome.wav"]
+instruments :: Array { name :: String, file :: String }
+instruments =
+  [ { name: "Kick", file: "sounds/kick.wav" }
+  , { name: "Snare", file: "sounds/snare.wav" }
+  , { name: "Metronome", file: "sounds/metronome.wav" }
+  ]
 
 controlButton :: forall a. String -> H.Action Query -> H.HTML a Query
 controlButton iconName act =
@@ -93,9 +97,9 @@ ui = H.parentComponent { render, eval, peek }
             , controlButton "trash-o" ClearNotes
             ]
         , HH.table_ $ map
-            (\name ->
-              HH.slot (InstrumentSlot name) \_ ->
-                { component: I.ui
+            (\instrument ->
+              HH.slot (InstrumentSlot instrument.name) \_ ->
+                { component: I.ui instrument.name
                 , initialState: { sample: Nothing, notes: replicate 16 false, phase: 0 } })
             instruments
         , HH.p [ HE.onMouseDown (HE.input_ EnableIosAudio) ] [ HH.text "Enable audio (iOs)" ]
@@ -108,7 +112,9 @@ ui = H.parentComponent { render, eval, peek }
       sampleData <- get "sounds/bd01.wav"
       loadSample sampleData.response
     H.modify \state -> state { sample = Just sample }
-    sequence_ $ map (\name -> H.query (InstrumentSlot name) (H.action (I.LoadSample name))) instruments
+    sequence_ $ map (\instrument ->
+        H.query (InstrumentSlot instrument.name) (H.action (I.LoadSample instrument.file)))
+      instruments
     pure next
   eval (UpdateTempo tempo next) = do
     H.modify (\state -> state { tempo = fromMaybe state.tempo (fromString tempo) })
@@ -126,7 +132,7 @@ ui = H.parentComponent { render, eval, peek }
       Stopped -> pure unit
       Paused _ -> pure unit
       Playing phase -> do
-        sequence_ $ map (\name -> H.query (InstrumentSlot name) (H.action I.Tick)) instruments
+        sequence_ $ map (\instrument -> H.query (InstrumentSlot instrument.name) (H.action I.Tick)) instruments
         H.modify (\s -> s { playState = Playing (phase + 1) })
     pure next
   eval (AskTempo k) = do
@@ -140,7 +146,7 @@ ui = H.parentComponent { render, eval, peek }
     pure next
   eval (Stop next) = do
     H.modify \state -> state { playState = Stopped }
-    sequence_ $ map (\name -> H.query (InstrumentSlot name) (H.action I.Reset)) instruments
+    sequence_ $ map (\instrument -> H.query (InstrumentSlot instrument.name) (H.action I.Reset)) instruments
     pure next
   eval (Play next) = do
     H.modify \state ->
@@ -156,7 +162,7 @@ ui = H.parentComponent { render, eval, peek }
         _ -> state
     pure next
   eval (ClearNotes next) = do
-    sequence_ $ map (\name -> H.query (InstrumentSlot name) (H.action I.ClearNotes)) instruments
+    sequence_ $ map (\instrument -> H.query (InstrumentSlot instrument.name) (H.action I.ClearNotes)) instruments
     pure next
 
   peek = Nothing

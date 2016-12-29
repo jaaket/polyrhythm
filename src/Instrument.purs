@@ -34,13 +34,14 @@ data Query a
   | Reset a
   | ClearNotes a
 
-ui :: forall eff. H.Component State Query (Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO | eff)))
-ui = H.component { render, eval }
+ui :: forall eff. String -> H.Component State Query (Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO | eff)))
+ui name = H.component { render, eval }
   where
 
   render :: State -> H.ComponentHTML Query
   render state =
     HH.tr_ $
+      [ HH.td_ [ HH.text name ] ] <>
       map
         (\i -> HH.td
             ([ HP.classes $
