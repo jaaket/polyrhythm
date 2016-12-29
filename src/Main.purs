@@ -60,13 +60,14 @@ instruments = ["sounds/kick.wav", "sounds/snare.wav", "sounds/metronome.wav"]
 
 controlButton :: forall a. String -> H.Action Query -> H.HTML a Query
 controlButton iconName act =
-  HH.i [ HE.onClick (HE.input_ act)
-       , HP.classes
+  HH.i (onMouseDownOrTouchStart act <>
+          [ HP.classes
             [ HH.className "control"
             , HH.className "fa"
             , HH.className ("fa-" <> iconName)
-            , HH.className "fa-3x" ]
+            , HH.className "fa-3x"
             ]
+          ])
        []
 
 ui :: forall eff. H.Component (State' (App eff)) Query' (App eff)

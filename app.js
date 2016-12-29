@@ -31079,8 +31079,8 @@ var Data_Ring = require("../Data.Ring");
 var Data_EuclideanRing = require("../Data.EuclideanRing");
 var Halogen_Component = require("../Halogen.Component");
 var Halogen_HTML_Elements = require("../Halogen.HTML.Elements");
-var Halogen_HTML_Core = require("../Halogen.HTML.Core");
 var Data_Semigroup = require("../Data.Semigroup");
+var Halogen_HTML_Core = require("../Halogen.HTML.Core");
 var Data_Show = require("../Data.Show");
 var Data_Function = require("../Data.Function");
 var Data_Functor = require("../Data.Functor");
@@ -31239,7 +31239,7 @@ var mainLoop = function (driver) {
                 if (!$19) {
                     return loop(lastTick);
                 };
-                throw new Error("Failed pattern match at Main line 170, column 13 - line 174, column 33: " + [ $19.constructor.name ]);
+                throw new Error("Failed pattern match at Main line 171, column 13 - line 175, column 33: " + [ $19.constructor.name ]);
             });
         });
     };
@@ -31265,7 +31265,7 @@ var ordInstrumentSlot = new Data_Ord.Ord(function () {
 });
 var controlButton = function (iconName) {
     return function (act) {
-        return Halogen_HTML_Elements.i([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(act)), Halogen_HTML_Properties.classes([ Halogen_HTML_Core.className("control"), Halogen_HTML_Core.className("fa"), Halogen_HTML_Core.className("fa-" + iconName), Halogen_HTML_Core.className("fa-3x") ]) ])([  ]);
+        return Halogen_HTML_Elements.i(Data_Semigroup.append(Data_Semigroup.semigroupArray)(HalogenUtil.onMouseDownOrTouchStart(act))([ Halogen_HTML_Properties.classes([ Halogen_HTML_Core.className("control"), Halogen_HTML_Core.className("fa"), Halogen_HTML_Core.className("fa-" + iconName), Halogen_HTML_Core.className("fa-3x") ]) ]))([  ]);
     };
 };
 var ui = (function () {
@@ -31380,7 +31380,7 @@ var ui = (function () {
                             });
                         });
                     };
-                    throw new Error("Failed pattern match at Main line 124, column 5 - line 129, column 63: " + [ v1.playState.constructor.name ]);
+                    throw new Error("Failed pattern match at Main line 125, column 5 - line 130, column 63: " + [ v1.playState.constructor.name ]);
                 })())(function () {
                     return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
                 });
@@ -31400,7 +31400,7 @@ var ui = (function () {
                     if (v1.sample instanceof Data_Maybe.Nothing) {
                         return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(Data_Unit.unit);
                     };
-                    throw new Error("Failed pattern match at Main line 136, column 5 - line 138, column 27: " + [ v1.sample.constructor.name ]);
+                    throw new Error("Failed pattern match at Main line 137, column 5 - line 139, column 27: " + [ v1.sample.constructor.name ]);
                 })())(function () {
                     return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
                 });
@@ -31449,7 +31449,7 @@ var ui = (function () {
                 if (state.playState instanceof Playing) {
                     return state;
                 };
-                throw new Error("Failed pattern match at Main line 146, column 7 - line 149, column 27: " + [ state.playState.constructor.name ]);
+                throw new Error("Failed pattern match at Main line 147, column 7 - line 150, column 27: " + [ state.playState.constructor.name ]);
             }))(function () {
                 return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
             });
@@ -31478,7 +31478,7 @@ var ui = (function () {
                 return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
             });
         };
-        throw new Error("Failed pattern match at Main line 105, column 3 - line 111, column 14: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at Main line 106, column 3 - line 112, column 14: " + [ v.constructor.name ]);
     };
     return Halogen_Component.parentComponent(Control_Monad_Aff.functorAff)(ordInstrumentSlot)({
         render: render, 
