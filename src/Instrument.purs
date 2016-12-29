@@ -59,7 +59,6 @@ ui = H.component { render, eval }
     H.modify \state -> state { sample = Just sample }
     pure next
   eval (Tick next) = do
-    fromAff $ log "foo"
     state <- H.get
     fromEff $ case state.sample of
       Just sample ->

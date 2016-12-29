@@ -2,31 +2,34 @@ module Main where
 
 import Prelude
 import RequestAnimationFrame
+import HalogenUtil
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Events.Forms as HF
 import Halogen.HTML.Properties as HP
 import Instrument as I
-import Audio (AUDIO)
+import Audio (AUDIO, loadSample, play, Sample)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Aff.Console (log)
 import Control.Monad.Aff.Free (fromAff)
 import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE)
-import Data.Array (replicate, zipWith)
+import Data.Array (replicate)
 import Data.Foldable (sequence_)
 import Data.Functor.Coproduct (Coproduct, left)
 import Data.Int (fromString, toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Halogen.Util (awaitBody, runHalogenAff)
-import Network.HTTP.Affjax (AJAX)
+import HalogenUtil (onTouchEnd)
+import Network.HTTP.Affjax (AJAX, get)
 
 
-type State = { phase :: Int, tempo :: Int }
+type State = { phase :: Int, tempo :: Int, sample :: Maybe Sample }
 
 initialState :: forall eff. State' (App eff)
-initialState = H.parentState { phase: 0, tempo: 120 }
+initialState = H.parentState { phase: 0, tempo: 120, sample: Nothing }
 
 newtype InstrumentSlot = InstrumentSlot String
 derive instance eqInstrumentSlot :: Eq InstrumentSlot
@@ -35,13 +38,12 @@ derive instance ordInstrumentSlot :: Ord InstrumentSlot
 
 data Query a
   = Init a
-  -- | UpdateA String a
-  -- | UpdateB String a
   | UpdateTempo String a
   | DecrTempo a
   | IncrTempo a
   | Tick a
   | AskTempo (Number -> a)
+  | EnableIosAudio a
 
 type App eff = Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO | eff))
 
@@ -70,11 +72,16 @@ ui = H.parentComponent { render, eval, peek }
                 { component: I.ui
                 , initialState: { sample: Nothing, notes: replicate 16 false, phase: 0 } })
             instruments
+        , HH.p [ HE.onMouseDown (HE.input_ EnableIosAudio) ] [ HH.text "Enable audio (iOs)" ]
         ]
       ]
 
   eval :: Query ~> H.ParentDSL State I.State Query I.Query (App eff) InstrumentSlot
   eval (Init next) = do
+    sample <- fromAff $ do
+      sampleData <- get "sounds/bd01.wav"
+      loadSample sampleData.response
+    H.modify \state -> state { sample = Just sample }
     sequence_ $ map (\name -> H.query (InstrumentSlot name) (H.action (I.LoadSample name))) instruments
     pure next
   eval (UpdateTempo tempo next) = do
@@ -89,12 +96,17 @@ ui = H.parentComponent { render, eval, peek }
     pure next
   eval (Tick next) = do
     sequence_ $ map (\name -> H.query (InstrumentSlot name) (H.action I.Tick)) instruments
-    fromAff $ log "asd"
     H.modify (\s -> s { phase = s.phase + 1 })
     pure next
   eval (AskTempo k) = do
     state <- H.get
     pure (k (60000.0 / toNumber state.tempo / 4.0))
+  eval (EnableIosAudio next) = do
+    state <- H.get
+    case state.sample of
+      Just sample -> fromAff $ liftEff $ play sample
+      Nothing -> pure unit
+    pure next
 
   peek = Nothing
 
