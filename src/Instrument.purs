@@ -1,20 +1,19 @@
 module Instrument where
 
 import Prelude
+import Data.Lens
+import Audio
 import Halogen as H
 import Halogen.HTML as HH
-import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Data.Lens
-import Data.Lens.Index (ix)
 import Control.Monad.Aff (Aff)
+import Control.Monad.Aff.Console (CONSOLE)
 import Control.Monad.Aff.Free (fromEff, fromAff)
-import Data.Maybe (Maybe(..))
 import Data.Array (length, range)
+import Data.Lens.Index (ix)
+import Data.Maybe (Maybe(..))
+import HalogenUtil (onMouseDownOrTouchStart)
 import Network.HTTP.Affjax (get, AJAX)
-import Control.Monad.Aff.Console (log, CONSOLE)
-
-import Audio
 
 
 type State = { sample :: Maybe Sample, notes :: Array Boolean, phase :: Int }
@@ -42,13 +41,13 @@ ui = H.component { render, eval }
     HH.tr_ $
       map
         (\i -> HH.td
-            [ HP.classes $
+            ([ HP.classes $
                 [ HH.className $ case state.notes ^? ix i of
                     Just true -> "on"
                     _ -> "off" ]
                 <> if (state.phase - 1) `mod` (numNotes state) == i then [ HH.className "playing" ] else []
-            , HE.onClick (HE.input_ (ToggleNote i))
-            ] [])
+             ] <> onMouseDownOrTouchStart (ToggleNote i))
+            [])
         (range 0 (numNotes state - 1))
 
   eval :: Query ~> H.ComponentDSL State Query (Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO | eff)))
