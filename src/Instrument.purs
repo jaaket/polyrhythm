@@ -31,6 +31,7 @@ data Query a
   = LoadSample String a
   | Tick a
   | ToggleNote Int a
+  | Reset a
 
 ui :: forall eff. H.Component State Query (Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO | eff)))
 ui = H.component { render, eval }
@@ -67,4 +68,7 @@ ui = H.component { render, eval }
     pure next
   eval (ToggleNote note next) = do
     H.modify \state -> state { notes = ix note %~ not $ state.notes }
+    pure next
+  eval (Reset next) = do
+    H.modify \state -> state { phase = 0 }
     pure next

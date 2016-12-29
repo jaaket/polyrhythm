@@ -22,14 +22,15 @@ import Data.Functor.Coproduct (Coproduct, left)
 import Data.Int (fromString, toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Halogen.Util (awaitBody, runHalogenAff)
-import HalogenUtil (onTouchEnd)
 import Network.HTTP.Affjax (AJAX, get)
 
 
-type State = { phase :: Int, tempo :: Int, sample :: Maybe Sample }
+data PlayState = Stopped | Playing Int | Paused Int
+
+type State = { tempo :: Int, sample :: Maybe Sample, playState :: PlayState }
 
 initialState :: forall eff. State' (App eff)
-initialState = H.parentState { phase: 0, tempo: 120, sample: Nothing }
+initialState = H.parentState { tempo: 120, sample: Nothing, playState: Playing 0 }
 
 newtype InstrumentSlot = InstrumentSlot String
 derive instance eqInstrumentSlot :: Eq InstrumentSlot
@@ -44,6 +45,9 @@ data Query a
   | Tick a
   | AskTempo (Number -> a)
   | EnableIosAudio a
+  | Stop a
+  | Play a
+  | Pause a
 
 type App eff = Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO | eff))
 
@@ -61,10 +65,23 @@ ui = H.parentComponent { render, eval, peek }
   render state =
     HH.div [ HP.class_ (HH.className "main") ]
       [ HH.div_
-        [ HH.div [ HP.class_ (HH.className "tempo") ]
-            [ HH.button [ HE.onClick (HE.input_ DecrTempo) ] [ HH.text "−10" ]
-            , HH.input [ HF.onValueInput (HE.input UpdateTempo), HP.placeholder (show state.tempo) ]
-            , HH.button [ HE.onClick (HE.input_ IncrTempo) ] [ HH.text "+10" ]
+        [ HH.div [ HP.class_ (HH.className "controls") ]
+            [ HH.div [ HP.class_ (HH.className "playback") ]
+                [ HH.i [ HE.onClick (HE.input_ Stop)
+                       , HP.classes [ HH.className "control", HH.className "fa", HH.className "fa-stop", HH.className "fa-3x" ] ] []
+                , case state.playState of
+                    Playing _ ->
+                      HH.i [ HE.onClick (HE.input_ Pause)
+                           , HP.classes [ HH.className "control", HH.className "fa", HH.className "fa-pause", HH.className "fa-3x" ] ] []
+                    _ ->
+                      HH.i [ HE.onClick (HE.input_ Play)
+                           , HP.classes [ HH.className "control", HH.className "fa", HH.className "fa-play", HH.className "fa-3x" ] ] []
+                ]
+            , HH.div [ HP.class_ (HH.className "tempo") ]
+                [ HH.button [ HE.onClick (HE.input_ DecrTempo) ] [ HH.text "−10" ]
+                , HH.input [ HF.onValueInput (HE.input UpdateTempo), HP.placeholder (show state.tempo) ]
+                , HH.button [ HE.onClick (HE.input_ IncrTempo) ] [ HH.text "+10" ]
+                ]
             ]
         , HH.table_ $ map
             (\name ->
@@ -95,8 +112,13 @@ ui = H.parentComponent { render, eval, peek }
     H.modify (\state -> state { tempo = state.tempo + 10 })
     pure next
   eval (Tick next) = do
-    sequence_ $ map (\name -> H.query (InstrumentSlot name) (H.action I.Tick)) instruments
-    H.modify (\s -> s { phase = s.phase + 1 })
+    state <- H.get
+    case state.playState of
+      Stopped -> pure unit
+      Paused _ -> pure unit
+      Playing phase -> do
+        sequence_ $ map (\name -> H.query (InstrumentSlot name) (H.action I.Tick)) instruments
+        H.modify (\s -> s { playState = Playing (phase + 1) })
     pure next
   eval (AskTempo k) = do
     state <- H.get
@@ -106,6 +128,23 @@ ui = H.parentComponent { render, eval, peek }
     case state.sample of
       Just sample -> fromAff $ liftEff $ play sample
       Nothing -> pure unit
+    pure next
+  eval (Stop next) = do
+    H.modify \state -> state { playState = Stopped }
+    sequence_ $ map (\name -> H.query (InstrumentSlot name) (H.action I.Reset)) instruments
+    pure next
+  eval (Play next) = do
+    H.modify \state ->
+      case state.playState of
+        Stopped -> state { playState = Playing 0 }
+        Paused phase -> state { playState = Playing phase }
+        Playing _ -> state
+    pure next
+  eval (Pause next) = do
+    H.modify \state ->
+      case state.playState of
+        Playing phase -> state { playState = Paused phase }
+        _ -> state
     pure next
 
   peek = Nothing

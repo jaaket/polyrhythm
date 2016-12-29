@@ -30,8 +30,22 @@ input {
   font: 2em sans-serif;
 }
 
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.control {
+  margin: 10px;
+}
+
+.playback {
+  display: flex;
+}
+
 .tempo {
-  margin: 20px auto;
+  margin: 20px;
   display: flex;
   justify-content: center;
   align-items: baseline;
