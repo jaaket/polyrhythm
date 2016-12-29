@@ -31080,6 +31080,7 @@ var Data_EuclideanRing = require("../Data.EuclideanRing");
 var Halogen_Component = require("../Halogen.Component");
 var Halogen_HTML_Elements = require("../Halogen.HTML.Elements");
 var Halogen_HTML_Core = require("../Halogen.HTML.Core");
+var Data_Semigroup = require("../Data.Semigroup");
 var Data_Show = require("../Data.Show");
 var Data_Function = require("../Data.Function");
 var Data_Functor = require("../Data.Functor");
@@ -31238,7 +31239,7 @@ var mainLoop = function (driver) {
                 if (!$19) {
                     return loop(lastTick);
                 };
-                throw new Error("Failed pattern match at Main line 165, column 13 - line 169, column 33: " + [ $19.constructor.name ]);
+                throw new Error("Failed pattern match at Main line 170, column 13 - line 174, column 33: " + [ $19.constructor.name ]);
             });
         });
     };
@@ -31262,14 +31263,19 @@ var ordInstrumentSlot = new Data_Ord.Ord(function () {
         return Data_Ord.compare(Data_Ord.ordString)(x)(y);
     };
 });
+var controlButton = function (iconName) {
+    return function (act) {
+        return Halogen_HTML_Elements.i([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(act)), Halogen_HTML_Properties.classes([ Halogen_HTML_Core.className("control"), Halogen_HTML_Core.className("fa"), Halogen_HTML_Core.className("fa-" + iconName), Halogen_HTML_Core.className("fa-3x") ]) ])([  ]);
+    };
+};
 var ui = (function () {
     var render = function (state) {
-        return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("main")) ])([ Halogen_HTML_Elements.div_([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("controls")) ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("playback")) ])([ Halogen_HTML_Elements.i([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(Stop.create)), Halogen_HTML_Properties.classes([ Halogen_HTML_Core.className("control"), Halogen_HTML_Core.className("fa"), Halogen_HTML_Core.className("fa-stop"), Halogen_HTML_Core.className("fa-3x") ]) ])([  ]), (function () {
+        return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("main")) ])([ Halogen_HTML_Elements.div_([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("controls")) ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("playback")) ])([ controlButton("stop")(Stop.create), (function () {
             if (state.playState instanceof Playing) {
-                return Halogen_HTML_Elements.i([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(Pause.create)), Halogen_HTML_Properties.classes([ Halogen_HTML_Core.className("control"), Halogen_HTML_Core.className("fa"), Halogen_HTML_Core.className("fa-pause"), Halogen_HTML_Core.className("fa-3x") ]) ])([  ]);
+                return controlButton("pause")(Pause.create);
             };
-            return Halogen_HTML_Elements.i([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(Play.create)), Halogen_HTML_Properties.classes([ Halogen_HTML_Core.className("control"), Halogen_HTML_Core.className("fa"), Halogen_HTML_Core.className("fa-play"), Halogen_HTML_Core.className("fa-3x") ]) ])([  ]);
-        })() ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("tempo")) ])([ Halogen_HTML_Elements.button([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(DecrTempo.create)) ])([ Halogen_HTML.text("\u221210") ]), Halogen_HTML_Elements.input([ Halogen_HTML_Events_Forms.onValueInput(Halogen_HTML_Events.input(UpdateTempo.create)), Halogen_HTML_Properties.placeholder(Data_Show.show(Data_Show.showInt)(state.tempo)) ]), Halogen_HTML_Elements.button([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(IncrTempo.create)) ])([ Halogen_HTML.text("+10") ]) ]), Halogen_HTML_Elements.i([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(ClearNotes.create)), Halogen_HTML_Properties.classes([ Halogen_HTML_Core.className("control"), Halogen_HTML_Core.className("fa"), Halogen_HTML_Core.className("fa-trash-o"), Halogen_HTML_Core.className("fa-3x") ]) ])([  ]) ]), Halogen_HTML_Elements.table_(Data_Functor.map(Data_Functor.functorArray)(function (name) {
+            return controlButton("play")(Play.create);
+        })() ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("tempo")) ])([ Halogen_HTML_Elements.button([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(DecrTempo.create)) ])([ Halogen_HTML.text("\u221210") ]), Halogen_HTML_Elements.input([ Halogen_HTML_Events_Forms.onValueInput(Halogen_HTML_Events.input(UpdateTempo.create)), Halogen_HTML_Properties.placeholder(Data_Show.show(Data_Show.showInt)(state.tempo)) ]), Halogen_HTML_Elements.button([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(IncrTempo.create)) ])([ Halogen_HTML.text("+10") ]) ]), controlButton("trash-o")(ClearNotes.create) ]), Halogen_HTML_Elements.table_(Data_Functor.map(Data_Functor.functorArray)(function (name) {
             return Halogen_HTML.slot(name)(function (v) {
                 return {
                     component: Instrument.ui, 
@@ -31374,7 +31380,7 @@ var ui = (function () {
                             });
                         });
                     };
-                    throw new Error("Failed pattern match at Main line 119, column 5 - line 124, column 63: " + [ v1.playState.constructor.name ]);
+                    throw new Error("Failed pattern match at Main line 124, column 5 - line 129, column 63: " + [ v1.playState.constructor.name ]);
                 })())(function () {
                     return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
                 });
@@ -31394,7 +31400,7 @@ var ui = (function () {
                     if (v1.sample instanceof Data_Maybe.Nothing) {
                         return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(Data_Unit.unit);
                     };
-                    throw new Error("Failed pattern match at Main line 131, column 5 - line 133, column 27: " + [ v1.sample.constructor.name ]);
+                    throw new Error("Failed pattern match at Main line 136, column 5 - line 138, column 27: " + [ v1.sample.constructor.name ]);
                 })())(function () {
                     return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
                 });
@@ -31443,7 +31449,7 @@ var ui = (function () {
                 if (state.playState instanceof Playing) {
                     return state;
                 };
-                throw new Error("Failed pattern match at Main line 141, column 7 - line 144, column 27: " + [ state.playState.constructor.name ]);
+                throw new Error("Failed pattern match at Main line 146, column 7 - line 149, column 27: " + [ state.playState.constructor.name ]);
             }))(function () {
                 return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
             });
@@ -31472,7 +31478,7 @@ var ui = (function () {
                 return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
             });
         };
-        throw new Error("Failed pattern match at Main line 100, column 3 - line 106, column 14: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at Main line 105, column 3 - line 111, column 14: " + [ v.constructor.name ]);
     };
     return Halogen_Component.parentComponent(Control_Monad_Aff.functorAff)(ordInstrumentSlot)({
         render: render, 
@@ -31505,6 +31511,7 @@ module.exports = {
     Play: Play, 
     Pause: Pause, 
     ClearNotes: ClearNotes, 
+    controlButton: controlButton, 
     initialState: initialState, 
     instruments: instruments, 
     main: main, 
@@ -31514,7 +31521,7 @@ module.exports = {
     ordInstrumentSlot: ordInstrumentSlot
 };
 
-},{"../Audio":27,"../Control.Applicative":30,"../Control.Bind":36,"../Control.Monad.Aff":51,"../Control.Monad.Aff.Console":46,"../Control.Monad.Aff.Free":47,"../Control.Monad.Eff":64,"../Control.Monad.Eff.Class":54,"../Control.Monad.Eff.Console":56,"../Control.Monad.Free":69,"../Control.Semigroupoid":91,"../Data.Array":119,"../Data.Eq":138,"../Data.EuclideanRing":140,"../Data.Foldable":145,"../Data.Function":159,"../Data.Functor":165,"../Data.Functor.Coproduct":162,"../Data.Int":177,"../Data.Maybe":210,"../Data.Ord":228,"../Data.Ring":238,"../Data.Semiring":242,"../Data.Show":245,"../Data.Unit":260,"../Halogen":287,"../Halogen.Component":267,"../Halogen.Driver":268,"../Halogen.HTML":279,"../Halogen.HTML.Core":270,"../Halogen.HTML.Elements":271,"../Halogen.HTML.Events":276,"../Halogen.HTML.Events.Forms":272,"../Halogen.HTML.Properties":277,"../Halogen.Query":285,"../Halogen.Query.HalogenF":283,"../Halogen.Util":286,"../HalogenUtil":288,"../Instrument":289,"../Network.HTTP.Affjax":296,"../Network.HTTP.Affjax.Response":294,"../Prelude":304,"../RequestAnimationFrame":306}],291:[function(require,module,exports){
+},{"../Audio":27,"../Control.Applicative":30,"../Control.Bind":36,"../Control.Monad.Aff":51,"../Control.Monad.Aff.Console":46,"../Control.Monad.Aff.Free":47,"../Control.Monad.Eff":64,"../Control.Monad.Eff.Class":54,"../Control.Monad.Eff.Console":56,"../Control.Monad.Free":69,"../Control.Semigroupoid":91,"../Data.Array":119,"../Data.Eq":138,"../Data.EuclideanRing":140,"../Data.Foldable":145,"../Data.Function":159,"../Data.Functor":165,"../Data.Functor.Coproduct":162,"../Data.Int":177,"../Data.Maybe":210,"../Data.Ord":228,"../Data.Ring":238,"../Data.Semigroup":240,"../Data.Semiring":242,"../Data.Show":245,"../Data.Unit":260,"../Halogen":287,"../Halogen.Component":267,"../Halogen.Driver":268,"../Halogen.HTML":279,"../Halogen.HTML.Core":270,"../Halogen.HTML.Elements":271,"../Halogen.HTML.Events":276,"../Halogen.HTML.Events.Forms":272,"../Halogen.HTML.Properties":277,"../Halogen.Query":285,"../Halogen.Query.HalogenF":283,"../Halogen.Util":286,"../HalogenUtil":288,"../Instrument":289,"../Network.HTTP.Affjax":296,"../Network.HTTP.Affjax.Response":294,"../Prelude":304,"../RequestAnimationFrame":306}],291:[function(require,module,exports){
 "use strict";
 
 // module Math

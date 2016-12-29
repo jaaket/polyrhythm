@@ -58,6 +58,17 @@ type Query' = Coproduct Query (H.ChildF InstrumentSlot I.Query)
 instruments :: Array String
 instruments = ["sounds/kick.wav", "sounds/snare.wav", "sounds/metronome.wav"]
 
+controlButton :: forall a. String -> H.Action Query -> H.HTML a Query
+controlButton iconName act =
+  HH.i [ HE.onClick (HE.input_ act)
+       , HP.classes
+            [ HH.className "control"
+            , HH.className "fa"
+            , HH.className ("fa-" <> iconName)
+            , HH.className "fa-3x" ]
+            ]
+       []
+
 ui :: forall eff. H.Component (State' (App eff)) Query' (App eff)
 ui = H.parentComponent { render, eval, peek }
   where
@@ -68,23 +79,17 @@ ui = H.parentComponent { render, eval, peek }
       [ HH.div_
         [ HH.div [ HP.class_ (HH.className "controls") ]
             [ HH.div [ HP.class_ (HH.className "playback") ]
-                [ HH.i [ HE.onClick (HE.input_ Stop)
-                       , HP.classes [ HH.className "control", HH.className "fa", HH.className "fa-stop", HH.className "fa-3x" ] ] []
+                [ controlButton "stop" Stop
                 , case state.playState of
-                    Playing _ ->
-                      HH.i [ HE.onClick (HE.input_ Pause)
-                           , HP.classes [ HH.className "control", HH.className "fa", HH.className "fa-pause", HH.className "fa-3x" ] ] []
-                    _ ->
-                      HH.i [ HE.onClick (HE.input_ Play)
-                           , HP.classes [ HH.className "control", HH.className "fa", HH.className "fa-play", HH.className "fa-3x" ] ] []
+                    Playing _ -> controlButton "pause" Pause
+                    _ -> controlButton "play" Play
                 ]
             , HH.div [ HP.class_ (HH.className "tempo") ]
                 [ HH.button [ HE.onClick (HE.input_ DecrTempo) ] [ HH.text "−10" ]
                 , HH.input [ HF.onValueInput (HE.input UpdateTempo), HP.placeholder (show state.tempo) ]
                 , HH.button [ HE.onClick (HE.input_ IncrTempo) ] [ HH.text "+10" ]
                 ]
-            , HH.i [ HE.onClick (HE.input_ ClearNotes)
-                   , HP.classes [ HH.className "control", HH.className "fa", HH.className "fa-trash-o", HH.className "fa-3x" ] ] []
+            , controlButton "trash-o" ClearNotes
             ]
         , HH.table_ $ map
             (\name ->
