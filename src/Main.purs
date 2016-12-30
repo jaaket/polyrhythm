@@ -41,6 +41,7 @@ type State =
   , playState :: PlayState
   , instruments :: Array Instrument
   , notes :: Array (Array Boolean)
+  , modalOpen :: Boolean
   }
 
 initialState :: State
@@ -51,6 +52,7 @@ initialState =
   , playState: Playing 0
   , instruments: []
   , notes: []
+  , modalOpen: false
   }
 
 data Query a
@@ -71,6 +73,8 @@ data Query a
   | ToggleNote Int Int a
   | PlaySample String a
   | AddInstrument InstrumentSpec a
+  | OpenModal a
+  | CloseModal a
 
 type App eff = Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO | eff))
 
@@ -158,7 +162,7 @@ ui = H.component { render, eval }
 
   render :: State -> H.ComponentHTML Query
   render state =
-    HH.div [ HP.class_ (HH.className "main") ]
+    HH.div [ HP.class_ (HH.className "main") ] $
       [ HH.div_
         [ HH.div [ HP.class_ (HH.className "controls") ]
             [ HH.div [ HP.class_ (HH.className "playback") ]
@@ -183,18 +187,25 @@ ui = H.component { render, eval }
             [ HH.table_ $ map (renderInstrument state) (range 0 (length state.notes - 1))
             ]
         , HH.div [ HP.class_ (HH.className "controls") ]
-            [ HH.table_ $ flip concatMap instrumentSets (\is -> flip map is.instruments \i ->
-                HH.tr_
-                  [ HH.td_ [ HH.text is.name ]
-                  , HH.td_ [ HH.text i.name ]
-                  , HH.td_ [ HH.i (onMouseDownOrTouchStart (PlaySample i.file) <> [ HP.classes [ HH.className "fa", HH.className "fa-volume-up" ] ]) [] ]
-                  , HH.td_ [ HH.i (onMouseDownOrTouchStart (AddInstrument i) <> [ HP.classes [ HH.className "fa", HH.className "fa-plus" ] ]) [] ]
-                  ]
-              )
-            ]
+            [ controlButton "plus" OpenModal ]
         , HH.p [ HE.onMouseDown (HE.input_ EnableIosAudio) ] [ HH.text "Enable audio (iOs)" ]
         ]
-      ]
+      ] <>
+      if state.modalOpen
+        then
+          [ HH.div [ HP.class_ (HH.className "modal") ]
+              [ HH.table_ $ flip concatMap instrumentSets (\is -> flip map is.instruments \i ->
+                  HH.tr_
+                    [ HH.td_ [ HH.text is.name ]
+                    , HH.td_ [ HH.text i.name ]
+                    , HH.td_ [ HH.i (onMouseDownOrTouchStart (PlaySample i.file) <> [ HP.classes [ HH.className "fa", HH.className "fa-volume-up" ] ]) [] ]
+                    , HH.td_ [ HH.i (onMouseDownOrTouchStart (AddInstrument i) <> [ HP.classes [ HH.className "fa", HH.className "fa-plus" ] ]) [] ]
+                    ]
+                )
+              ]
+          , HH.div ([ HP.class_ (HH.className "modal-background") ] <> onMouseDownOrTouchStart CloseModal) []
+          ]
+        else []
 
   eval :: Query ~> H.ComponentDSL State Query (App eff)
   eval (Init next) = do
@@ -284,6 +295,12 @@ ui = H.component { render, eval }
     H.modify \state -> state { instruments = state.instruments <> [ instrument ]
                              , notes = state.notes <> [ replicate state.beats false ]
                              }
+    pure next
+  eval (OpenModal next) = do
+    H.modify \state -> state { modalOpen = true }
+    pure next
+  eval (CloseModal next) = do
+    H.modify \state -> state { modalOpen = false }
     pure next
 
 renderInstrument :: State -> Int -> H.ComponentHTML Query
