@@ -78,6 +78,10 @@ button {
   animation-name: pulse;
 }
 
+.paused {
+  background-color: #EEFAFF;
+}
+
 @keyframes pulse {
   0% {
     background-color: #EEFAFF;

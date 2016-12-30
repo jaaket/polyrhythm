@@ -16,7 +16,7 @@ import HalogenUtil (onMouseDownOrTouchStart)
 import Network.HTTP.Affjax (get, AJAX)
 
 
-type State = { sample :: Maybe Sample, notes :: Array Boolean, phase :: Int }
+type State = { sample :: Maybe Sample, notes :: Array Boolean, phase :: Int, beats :: Int }
 
 numNotes :: State -> Int
 numNotes state = length state.notes
@@ -33,8 +33,10 @@ data Query a
   | ToggleNote Int a
   | Reset a
   | ClearNotes a
+  | SetBeats Int a
 
-ui :: forall eff. String -> H.Component State Query (Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO | eff)))
+ui :: forall eff. String
+   -> H.Component State Query (Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO | eff)))
 ui name = H.component { render, eval }
   where
 
@@ -48,10 +50,10 @@ ui name = H.component { render, eval }
                 [ HH.className $ case state.notes ^? ix i of
                     Just true -> "on"
                     _ -> "off" ]
-                <> if (state.phase - 1) `mod` (numNotes state) == i then [ HH.className "playing" ] else []
+                <> if (state.phase - 1) `mod` state.beats == i then [ HH.className "playing" ] else []
              ] <> onMouseDownOrTouchStart (ToggleNote i))
             [])
-        (range 0 (numNotes state - 1))
+        (range 0 (state.beats - 1))
 
   eval :: Query ~> H.ComponentDSL State Query (Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO | eff)))
   eval (LoadSample location next) = do
@@ -76,4 +78,7 @@ ui name = H.component { render, eval }
     pure next
   eval (ClearNotes next) = do
     H.modify \state -> state { notes = replicate (length state.notes) false }
+    pure next
+  eval (SetBeats beats next) = do
+    H.modify \state -> state { beats = beats }
     pure next
