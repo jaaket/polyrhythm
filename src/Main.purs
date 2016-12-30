@@ -16,7 +16,7 @@ import Control.Monad.Aff.Free (fromAff, fromEff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE)
-import Data.Array (cons, head, length, range, replicate, take, uncons, (!!))
+import Data.Array (concatMap, cons, head, length, range, replicate, take, uncons, (!!))
 import Data.Foldable (sequence_)
 import Data.Int (fromString, toNumber)
 import Data.Lens.Index (ix)
@@ -69,6 +69,8 @@ data Query a
   | Pause a
   | ClearNotes a
   | ToggleNote Int Int a
+  | PlaySample String a
+  | AddInstrument InstrumentSpec a
 
 type App eff = Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO | eff))
 
@@ -116,11 +118,14 @@ instrumentSets =
     }
   ]
 
-loadSet :: forall eff. InstrumentSetSpec -> Aff (ajax :: AJAX, audio :: AUDIO | eff) (Array Instrument)
-loadSet spec = flip traverse spec.instruments \instrument -> do
+loadInstrument :: forall eff. InstrumentSpec -> Aff (ajax :: AJAX, audio :: AUDIO | eff) Instrument
+loadInstrument instrument = do
   sampleData <- get instrument.file
   sample <- loadSample sampleData.response
-  pure { name: spec.name <> "/" <> instrument.name, sample: sample }
+  pure { name: instrument.name, sample: sample }
+
+loadSet :: forall eff. InstrumentSetSpec -> Aff (ajax :: AJAX, audio :: AUDIO | eff) (Array Instrument)
+loadSet spec = traverse loadInstrument spec.instruments
 
 controlButton :: forall a. String -> H.Action Query -> H.HTML a Query
 controlButton iconName act =
@@ -176,6 +181,16 @@ ui = H.component { render, eval }
             ]
         , HH.div [ HP.class_ (HH.className "controls") ]
             [ HH.table_ $ map (renderInstrument state) (range 0 (length state.notes - 1))
+            ]
+        , HH.div [ HP.class_ (HH.className "controls") ]
+            [ HH.table_ $ flip concatMap instrumentSets (\is -> flip map is.instruments \i ->
+                HH.tr_
+                  [ HH.td_ [ HH.text is.name ]
+                  , HH.td_ [ HH.text i.name ]
+                  , HH.td_ [ HH.i (onMouseDownOrTouchStart (PlaySample i.file) <> [ HP.classes [ HH.className "fa", HH.className "fa-volume-up" ] ]) [] ]
+                  , HH.td_ [ HH.i (onMouseDownOrTouchStart (AddInstrument i) <> [ HP.classes [ HH.className "fa", HH.className "fa-plus" ] ]) [] ]
+                  ]
+              )
             ]
         , HH.p [ HE.onMouseDown (HE.input_ EnableIosAudio) ] [ HH.text "Enable audio (iOs)" ]
         ]
@@ -257,6 +272,18 @@ ui = H.component { render, eval }
   eval (ToggleNote instrument note next) = do
     fromAff $ log "foo"
     H.modify \state -> state { notes = ix instrument <<< ix note %~ not $ state.notes }
+    pure next
+  eval (PlaySample location next) = do
+    sample <- fromAff $ do
+      sampleData <- get location
+      loadSample sampleData.response
+    fromEff $ play sample
+    pure next
+  eval (AddInstrument spec next) = do
+    instrument <- fromAff $ loadInstrument spec
+    H.modify \state -> state { instruments = state.instruments <> [ instrument ]
+                             , notes = state.notes <> [ replicate state.beats false ]
+                             }
     pure next
 
 renderInstrument :: State -> Int -> H.ComponentHTML Query
