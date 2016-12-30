@@ -80,7 +80,15 @@ type InstrumentSetSpec = { name :: String, instruments :: Array InstrumentSpec }
 
 instrumentSets :: Array InstrumentSetSpec
 instrumentSets =
-  [ { name: "C64"
+  [ { name: "Acoustic"
+    , instruments:
+        [ { name: "Kick", file: "sounds/acoustic/kick.wav" }
+        , { name: "Snare", file: "sounds/acoustic/snare.wav" }
+        , { name: "Hi-hat", file: "sounds/acoustic/hihat.wav" }
+        , { name: "Metronome", file: "sounds/acoustic/metronome.wav" }
+        ]
+    }
+  , { name: "C64"
     , instruments:
         [ { name: "Clap", file: "sounds/c64/clap.wav" }
         , { name: "Cowbell", file: "sounds/c64/cowbell.wav" }
@@ -106,18 +114,10 @@ instrumentSets =
         , { name: "Tom 2", file: "sounds/c64/tom_2.wav" }
         ]
     }
-    , { name: "Acoustic"
-      , instruments:
-          [ { name: "Kick", file: "sounds/acoustic/kick.wav" }
-          , { name: "Snare", file: "sounds/acoustic/snare.wav" }
-          , { name: "Hi-hat", file: "sounds/acoustic/hihat.wav" }
-          , { name: "Metronome", file: "sounds/acoustic/metronome.wav" }
-          ]
-    }
   ]
 
 loadSet :: forall eff. InstrumentSetSpec -> Aff (ajax :: AJAX, audio :: AUDIO | eff) (Array Instrument)
-loadSet spec =  flip traverse spec.instruments \instrument -> do
+loadSet spec = flip traverse spec.instruments \instrument -> do
   sampleData <- get instrument.file
   sample <- loadSample sampleData.response
   pure { name: spec.name <> "/" <> instrument.name, sample: sample }
@@ -167,15 +167,15 @@ ui = H.component { render, eval }
                 , HH.input [ HF.onValueInput (HE.input UpdateTempo), HP.placeholder (show state.tempo) ]
                 , HH.button (onMouseDownOrTouchStart IncrTempo) [ HH.text "+10" ]
                 ]
+            , HH.div [ HP.class_ (HH.className "tempo") ]
+                [ HH.button (onMouseDownOrTouchStart DecrBeats) [ HH.text "−" ]
+                , HH.input [ HF.onValueInput (HE.input UpdateBeats), HP.placeholder (show state.beats) ]
+                , HH.button (onMouseDownOrTouchStart IncrBeats) [ HH.text "+" ]
+                ]
             , controlButton "trash-o" ClearNotes
             ]
         , HH.div [ HP.class_ (HH.className "controls") ]
             [ HH.table_ $ map (renderInstrument state) (range 0 (length state.notes - 1))
-            ]
-        , HH.div [ HP.class_ (HH.className "tempo") ]
-            [ HH.button (onMouseDownOrTouchStart DecrBeats) [ HH.text "−" ]
-            , HH.input [ HF.onValueInput (HE.input UpdateBeats), HP.placeholder (show state.beats) ]
-            , HH.button (onMouseDownOrTouchStart IncrBeats) [ HH.text "+" ]
             ]
         , HH.p [ HE.onMouseDown (HE.input_ EnableIosAudio) ] [ HH.text "Enable audio (iOs)" ]
         ]

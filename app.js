@@ -31170,6 +31170,21 @@ var renderInstrument = function (state) {
     };
 };
 var instrumentSets = [ {
+    name: "Acoustic", 
+    instruments: [ {
+        name: "Kick", 
+        file: "sounds/acoustic/kick.wav"
+    }, {
+        name: "Snare", 
+        file: "sounds/acoustic/snare.wav"
+    }, {
+        name: "Hi-hat", 
+        file: "sounds/acoustic/hihat.wav"
+    }, {
+        name: "Metronome", 
+        file: "sounds/acoustic/metronome.wav"
+    } ]
+}, {
     name: "C64", 
     instruments: [ {
         name: "Clap", 
@@ -31238,21 +31253,6 @@ var instrumentSets = [ {
         name: "Tom 2", 
         file: "sounds/c64/tom_2.wav"
     } ]
-}, {
-    name: "Acoustic", 
-    instruments: [ {
-        name: "Kick", 
-        file: "sounds/acoustic/kick.wav"
-    }, {
-        name: "Snare", 
-        file: "sounds/acoustic/snare.wav"
-    }, {
-        name: "Hi-hat", 
-        file: "sounds/acoustic/hihat.wav"
-    }, {
-        name: "Metronome", 
-        file: "sounds/acoustic/metronome.wav"
-    } ]
 } ];
 var initialState = {
     beats: 16, 
@@ -31274,7 +31274,7 @@ var ui = (function () {
                 return controlButton("pause")(Pause.create);
             };
             return controlButton("play")(Play.create);
-        })() ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("tempo")) ])([ Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(DecrTempo.create))([ Halogen_HTML.text("\u221210") ]), Halogen_HTML_Elements.input([ Halogen_HTML_Events_Forms.onValueInput(Halogen_HTML_Events.input(UpdateTempo.create)), Halogen_HTML_Properties.placeholder(Data_Show.show(Data_Show.showInt)(state.tempo)) ]), Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(IncrTempo.create))([ Halogen_HTML.text("+10") ]) ]), controlButton("trash-o")(ClearNotes.create) ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("controls")) ])([ Halogen_HTML_Elements.table_(Data_Functor.map(Data_Functor.functorArray)(renderInstrument(state))(Data_Array.range(0)(Data_Array.length(state.notes) - 1))) ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("tempo")) ])([ Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(DecrBeats.create))([ Halogen_HTML.text("\u2212") ]), Halogen_HTML_Elements.input([ Halogen_HTML_Events_Forms.onValueInput(Halogen_HTML_Events.input(UpdateBeats.create)), Halogen_HTML_Properties.placeholder(Data_Show.show(Data_Show.showInt)(state.beats)) ]), Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(IncrBeats.create))([ Halogen_HTML.text("+") ]) ]), Halogen_HTML_Elements.p([ Halogen_HTML_Events.onMouseDown(Halogen_HTML_Events.input_(EnableIosAudio.create)) ])([ Halogen_HTML.text("Enable audio (iOs)") ]) ]) ]);
+        })() ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("tempo")) ])([ Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(DecrTempo.create))([ Halogen_HTML.text("\u221210") ]), Halogen_HTML_Elements.input([ Halogen_HTML_Events_Forms.onValueInput(Halogen_HTML_Events.input(UpdateTempo.create)), Halogen_HTML_Properties.placeholder(Data_Show.show(Data_Show.showInt)(state.tempo)) ]), Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(IncrTempo.create))([ Halogen_HTML.text("+10") ]) ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("tempo")) ])([ Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(DecrBeats.create))([ Halogen_HTML.text("\u2212") ]), Halogen_HTML_Elements.input([ Halogen_HTML_Events_Forms.onValueInput(Halogen_HTML_Events.input(UpdateBeats.create)), Halogen_HTML_Properties.placeholder(Data_Show.show(Data_Show.showInt)(state.beats)) ]), Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(IncrBeats.create))([ Halogen_HTML.text("+") ]) ]), controlButton("trash-o")(ClearNotes.create) ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("controls")) ])([ Halogen_HTML_Elements.table_(Data_Functor.map(Data_Functor.functorArray)(renderInstrument(state))(Data_Array.range(0)(Data_Array.length(state.notes) - 1))) ]), Halogen_HTML_Elements.p([ Halogen_HTML_Events.onMouseDown(Halogen_HTML_Events.input_(EnableIosAudio.create)) ])([ Halogen_HTML.text("Enable audio (iOs)") ]) ]) ]);
     };
     var $$eval = function (v) {
         if (v instanceof Init) {
