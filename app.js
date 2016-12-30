@@ -30853,19 +30853,19 @@ var Control_Bind = require("../Control.Bind");
 var Halogen_Query = require("../Halogen.Query");
 var Data_Ord = require("../Data.Ord");
 var Data_EuclideanRing = require("../Data.EuclideanRing");
+var Data_Function = require("../Data.Function");
+var Network_HTTP_Affjax_Response = require("../Network.HTTP.Affjax.Response");
+var Control_Applicative = require("../Control.Applicative");
 var Data_Lens_Fold = require("../Data.Lens.Fold");
 var Control_Semigroupoid = require("../Control.Semigroupoid");
 var Data_Lens_Internal_Forget = require("../Data.Lens.Internal.Forget");
 var Data_Maybe_First = require("../Data.Maybe.First");
-var Data_Function = require("../Data.Function");
 var Halogen_HTML_Elements = require("../Halogen.HTML.Elements");
 var Halogen_HTML_Core = require("../Halogen.HTML.Core");
 var Data_Eq = require("../Data.Eq");
 var Data_Show = require("../Data.Show");
 var Control_Monad_Free = require("../Control.Monad.Free");
 var Halogen_Query_HalogenF = require("../Halogen.Query.HalogenF");
-var Network_HTTP_Affjax_Response = require("../Network.HTTP.Affjax.Response");
-var Control_Applicative = require("../Control.Applicative");
 var Data_Unit = require("../Data.Unit");
 var Data_Lens_Setter = require("../Data.Lens.Setter");
 var Data_Lens_Internal_Wander = require("../Data.Lens.Internal.Wander");
@@ -31047,31 +31047,31 @@ var Paused = (function () {
 var zipWithIndex = function (f) {
     var go = function (i) {
         return function (arr) {
-            var $14 = Data_Array.uncons(arr);
-            if ($14 instanceof Data_Maybe.Just) {
-                return Data_Array.cons(f($14.value0.head)(i))(go(i + 1 | 0)($14.value0.tail));
+            var $15 = Data_Array.uncons(arr);
+            if ($15 instanceof Data_Maybe.Just) {
+                return Data_Array.cons(f($15.value0.head)(i))(go(i + 1 | 0)($15.value0.tail));
             };
-            if ($14 instanceof Data_Maybe.Nothing) {
+            if ($15 instanceof Data_Maybe.Nothing) {
                 return [  ];
             };
-            throw new Error("Failed pattern match at Main line 97, column 16 - line 99, column 20: " + [ $14.constructor.name ]);
+            throw new Error("Failed pattern match at Main line 140, column 16 - line 142, column 20: " + [ $15.constructor.name ]);
         };
     };
     return go(0);
 };
 var updateBeats = function (beats) {
     return function (state) {
-        var $18 = {};
-        for (var $19 in state) {
-            if (state.hasOwnProperty($19)) {
-                $18[$19] = state[$19];
+        var $19 = {};
+        for (var $20 in state) {
+            if (state.hasOwnProperty($20)) {
+                $19[$20] = state[$20];
             };
         };
-        $18.beats = beats;
-        $18.notes = Data_Functor.map(Data_Functor.functorArray)(function (row) {
+        $19.beats = beats;
+        $19.notes = Data_Functor.map(Data_Functor.functorArray)(function (row) {
             return Data_Semigroup.append(Data_Semigroup.semigroupArray)(Data_Array.take(beats)(row))(Data_Array.replicate(beats - state.beats)(false));
         })(state.notes);
-        return $18;
+        return $19;
     };
 };
 var mainLoop = function (driver) {
@@ -31079,28 +31079,40 @@ var mainLoop = function (driver) {
         return Control_Bind.bind(Control_Monad_Aff.bindAff)(driver(Halogen_Query.request(AskTempo.create)))(function (v) {
             return RequestAnimationFrame.requestAnimationFrame(function (time) {
                 var delta = time - lastTick;
-                var $22 = delta > v;
-                if ($22) {
+                var $23 = delta > v;
+                if ($23) {
                     return Control_Bind.bind(Control_Monad_Aff.bindAff)(driver(Halogen_Query.action(Tick.create)))(function () {
                         return loop(time - Data_EuclideanRing.mod(Data_EuclideanRing.euclideanRingNumber)(delta)(v));
                     });
                 };
-                if (!$22) {
+                if (!$23) {
                     return loop(lastTick);
                 };
-                throw new Error("Failed pattern match at Main line 255, column 13 - line 259, column 33: " + [ $22.constructor.name ]);
+                throw new Error("Failed pattern match at Main line 293, column 13 - line 297, column 33: " + [ $23.constructor.name ]);
             });
         });
     };
     return loop(0.0);
 };
+var loadSet = function (spec) {
+    return Data_Function.flip(Data_Traversable.traverse(Data_Traversable.traversableArray)(Control_Monad_Aff.applicativeAff))(spec.instruments)(function (instrument) {
+        return Control_Bind.bind(Control_Monad_Aff.bindAff)(Network_HTTP_Affjax.get(Network_HTTP_Affjax_Response.responsableArrayBuffer)(instrument.file))(function (v) {
+            return Control_Bind.bind(Control_Monad_Aff.bindAff)(Audio.loadSample(v.response))(function (v1) {
+                return Control_Applicative.pure(Control_Monad_Aff.applicativeAff)({
+                    name: spec.name + ("/" + instrument.name), 
+                    sample: v1
+                });
+            });
+        });
+    });
+};
 var isNoteOn = function (notes) {
     return function (instrument) {
         return function (note) {
-            var $23 = Data_Lens_Fold.previewOn(notes)(function ($112) {
-                return Data_Lens_Index.ix(Data_Lens_Index.indexArray)(instrument)(Data_Lens_Internal_Forget.wanderForget(Data_Maybe_First.monoidFirst))(Data_Lens_Index.ix(Data_Lens_Index.indexArray)(note)(Data_Lens_Internal_Forget.wanderForget(Data_Maybe_First.monoidFirst))($112));
+            var $26 = Data_Lens_Fold.previewOn(notes)(function ($114) {
+                return Data_Lens_Index.ix(Data_Lens_Index.indexArray)(instrument)(Data_Lens_Internal_Forget.wanderForget(Data_Maybe_First.monoidFirst))(Data_Lens_Index.ix(Data_Lens_Index.indexArray)(note)(Data_Lens_Internal_Forget.wanderForget(Data_Maybe_First.monoidFirst))($114));
             });
-            if ($23 instanceof Data_Maybe.Just && $23.value0) {
+            if ($26 instanceof Data_Maybe.Just && $26.value0) {
                 return true;
             };
             return false;
@@ -31109,61 +31121,145 @@ var isNoteOn = function (notes) {
 };
 var renderInstrument = function (state) {
     return function (instrument) {
-        return Halogen_HTML_Elements.tr_(Data_Functor.map(Data_Functor.functorArray)(function (i) {
+        return Halogen_HTML_Elements.tr_(Data_Semigroup.append(Data_Semigroup.semigroupArray)((function () {
+            var $28 = Data_Array.index(state.instruments)(instrument);
+            if ($28 instanceof Data_Maybe.Just) {
+                return [ Halogen_HTML_Elements.td_([ Halogen_HTML.text($28.value0.name) ]) ];
+            };
+            if ($28 instanceof Data_Maybe.Nothing) {
+                return [  ];
+            };
+            throw new Error("Failed pattern match at Main line 265, column 5 - line 267, column 20: " + [ $28.constructor.name ]);
+        })())(Data_Functor.map(Data_Functor.functorArray)(function (i) {
             return Halogen_HTML_Elements.td(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ Halogen_HTML_Properties.classes(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ Halogen_HTML_Core.className((function () {
-                var $25 = isNoteOn(state.notes)(instrument)(i);
-                if ($25) {
+                var $30 = isNoteOn(state.notes)(instrument)(i);
+                if ($30) {
                     return "on";
                 };
-                if (!$25) {
+                if (!$30) {
                     return "off";
                 };
-                throw new Error("Failed pattern match at Main line 233, column 32 - line 233, column 90: " + [ $25.constructor.name ]);
+                throw new Error("Failed pattern match at Main line 271, column 32 - line 271, column 90: " + [ $30.constructor.name ]);
             })()) ])((function () {
                 if (state.playState instanceof Playing) {
-                    var $27 = state.playState.value0 === i;
-                    if ($27) {
+                    var $32 = state.playState.value0 === i;
+                    if ($32) {
                         return [ Halogen_HTML_Core.className("playing") ];
                     };
-                    if (!$27) {
+                    if (!$32) {
                         return [  ];
                     };
-                    throw new Error("Failed pattern match at Main line 236, column 23 - line 238, column 32: " + [ $27.constructor.name ]);
+                    throw new Error("Failed pattern match at Main line 274, column 23 - line 276, column 32: " + [ $32.constructor.name ]);
                 };
                 if (state.playState instanceof Paused) {
-                    var $29 = state.playState.value0 === i;
-                    if ($29) {
+                    var $34 = state.playState.value0 === i;
+                    if ($34) {
                         return [ Halogen_HTML_Core.className("paused") ];
                     };
-                    if (!$29) {
+                    if (!$34) {
                         return [  ];
                     };
-                    throw new Error("Failed pattern match at Main line 240, column 23 - line 242, column 32: " + [ $29.constructor.name ]);
+                    throw new Error("Failed pattern match at Main line 278, column 23 - line 280, column 32: " + [ $34.constructor.name ]);
                 };
                 if (state.playState instanceof Stopped) {
                     return [  ];
                 };
-                throw new Error("Failed pattern match at Main line 234, column 18 - line 243, column 34: " + [ state.playState.constructor.name ]);
+                throw new Error("Failed pattern match at Main line 272, column 18 - line 281, column 34: " + [ state.playState.constructor.name ]);
             })())) ])(HalogenUtil.onMouseDownOrTouchStart(ToggleNote.create(instrument)(i))))([  ]);
-        })(Data_Array.range(0)(state.beats - 1)));
+        })(Data_Array.range(0)(state.beats - 1))));
     };
 };
-var instrumentSpecs = [ {
-    name: "Kick", 
-    file: "sounds/kick.wav"
+var instrumentSets = [ {
+    name: "C64", 
+    instruments: [ {
+        name: "Clap", 
+        file: "sounds/c64/clap.wav"
+    }, {
+        name: "Cowbell", 
+        file: "sounds/c64/cowbell.wav"
+    }, {
+        name: "Hihat 1", 
+        file: "sounds/c64/hihat_1.wav"
+    }, {
+        name: "Hihat 2", 
+        file: "sounds/c64/hihat_2.wav"
+    }, {
+        name: "Kick 1", 
+        file: "sounds/c64/kick_1.wav"
+    }, {
+        name: "Kick 2", 
+        file: "sounds/c64/kick_2.wav"
+    }, {
+        name: "Kick 3", 
+        file: "sounds/c64/kick_3.wav"
+    }, {
+        name: "Kick 4", 
+        file: "sounds/c64/kick_4.wav"
+    }, {
+        name: "Kick 5", 
+        file: "sounds/c64/kick_5.wav"
+    }, {
+        name: "Kick 6", 
+        file: "sounds/c64/kick_6.wav"
+    }, {
+        name: "Kick 7", 
+        file: "sounds/c64/kick_7.wav"
+    }, {
+        name: "Kick 8", 
+        file: "sounds/c64/kick_8.wav"
+    }, {
+        name: "Snare 1", 
+        file: "sounds/c64/snare_1.wav"
+    }, {
+        name: "Snare 2", 
+        file: "sounds/c64/snare_2.wav"
+    }, {
+        name: "Snare 3", 
+        file: "sounds/c64/snare_3.wav"
+    }, {
+        name: "Snare 4", 
+        file: "sounds/c64/snare_4.wav"
+    }, {
+        name: "Snare 5", 
+        file: "sounds/c64/snare_5.wav"
+    }, {
+        name: "Snare 6", 
+        file: "sounds/c64/snare_6.wav"
+    }, {
+        name: "Snare 7", 
+        file: "sounds/c64/snare_7.wav"
+    }, {
+        name: "Snare 8", 
+        file: "sounds/c64/snare_8.wav"
+    }, {
+        name: "Tom 1", 
+        file: "sounds/c64/tom_1.wav"
+    }, {
+        name: "Tom 2", 
+        file: "sounds/c64/tom_2.wav"
+    } ]
 }, {
-    name: "Snare", 
-    file: "sounds/snare.wav"
-}, {
-    name: "Metronome", 
-    file: "sounds/metronome.wav"
+    name: "Acoustic", 
+    instruments: [ {
+        name: "Kick", 
+        file: "sounds/acoustic/kick.wav"
+    }, {
+        name: "Snare", 
+        file: "sounds/acoustic/snare.wav"
+    }, {
+        name: "Hi-hat", 
+        file: "sounds/acoustic/hihat.wav"
+    }, {
+        name: "Metronome", 
+        file: "sounds/acoustic/metronome.wav"
+    } ]
 } ];
 var initialState = {
     beats: 16, 
     tempo: 120, 
     sample: Data_Maybe.Nothing.value, 
     playState: new Playing(0), 
-    instrumentSamples: Data_Maybe.Nothing.value, 
+    instruments: [  ], 
     notes: [  ]
 };
 var controlButton = function (iconName) {
@@ -31178,29 +31274,34 @@ var ui = (function () {
                 return controlButton("pause")(Pause.create);
             };
             return controlButton("play")(Play.create);
-        })() ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("tempo")) ])([ Halogen_HTML_Elements.button([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(DecrTempo.create)) ])([ Halogen_HTML.text("\u221210") ]), Halogen_HTML_Elements.input([ Halogen_HTML_Events_Forms.onValueInput(Halogen_HTML_Events.input(UpdateTempo.create)), Halogen_HTML_Properties.placeholder(Data_Show.show(Data_Show.showInt)(state.tempo)) ]), Halogen_HTML_Elements.button([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(IncrTempo.create)) ])([ Halogen_HTML.text("+10") ]) ]), controlButton("trash-o")(ClearNotes.create) ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("controls")) ])([ Halogen_HTML_Elements.table_(Data_Functor.map(Data_Functor.functorArray)(renderInstrument(state))(Data_Array.range(0)(Data_Array.length(state.notes) - 1))) ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("tempo")) ])([ Halogen_HTML_Elements.button([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(DecrBeats.create)) ])([ Halogen_HTML.text("\u2212") ]), Halogen_HTML_Elements.input([ Halogen_HTML_Events_Forms.onValueInput(Halogen_HTML_Events.input(UpdateBeats.create)), Halogen_HTML_Properties.placeholder(Data_Show.show(Data_Show.showInt)(state.beats)) ]), Halogen_HTML_Elements.button([ Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(IncrBeats.create)) ])([ Halogen_HTML.text("+") ]) ]), Halogen_HTML_Elements.p([ Halogen_HTML_Events.onMouseDown(Halogen_HTML_Events.input_(EnableIosAudio.create)) ])([ Halogen_HTML.text("Enable audio (iOs)") ]) ]) ]);
+        })() ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("tempo")) ])([ Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(DecrTempo.create))([ Halogen_HTML.text("\u221210") ]), Halogen_HTML_Elements.input([ Halogen_HTML_Events_Forms.onValueInput(Halogen_HTML_Events.input(UpdateTempo.create)), Halogen_HTML_Properties.placeholder(Data_Show.show(Data_Show.showInt)(state.tempo)) ]), Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(IncrTempo.create))([ Halogen_HTML.text("+10") ]) ]), controlButton("trash-o")(ClearNotes.create) ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("controls")) ])([ Halogen_HTML_Elements.table_(Data_Functor.map(Data_Functor.functorArray)(renderInstrument(state))(Data_Array.range(0)(Data_Array.length(state.notes) - 1))) ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("tempo")) ])([ Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(DecrBeats.create))([ Halogen_HTML.text("\u2212") ]), Halogen_HTML_Elements.input([ Halogen_HTML_Events_Forms.onValueInput(Halogen_HTML_Events.input(UpdateBeats.create)), Halogen_HTML_Properties.placeholder(Data_Show.show(Data_Show.showInt)(state.beats)) ]), Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(IncrBeats.create))([ Halogen_HTML.text("+") ]) ]), Halogen_HTML_Elements.p([ Halogen_HTML_Events.onMouseDown(Halogen_HTML_Events.input_(EnableIosAudio.create)) ])([ Halogen_HTML.text("Enable audio (iOs)") ]) ]) ]);
     };
     var $$eval = function (v) {
         if (v instanceof Init) {
             return Control_Bind.bind(Control_Monad_Free.freeBind)(Control_Monad_Aff_Free.fromAff(Control_Monad_Aff_Free.affableFree(Halogen_Query_HalogenF.affableHalogenF(Control_Monad_Aff_Free.affableAff)))(Control_Bind.bind(Control_Monad_Aff.bindAff)(Network_HTTP_Affjax.get(Network_HTTP_Affjax_Response.responsableArrayBuffer)("sounds/bd01.wav"))(function (v1) {
                 return Audio.loadSample(v1.response);
             })))(function (v1) {
-                return Control_Bind.bind(Control_Monad_Free.freeBind)(Data_Function.flip(Data_Traversable.traverse(Data_Traversable.traversableArray)(Control_Monad_Free.freeApplicative))(instrumentSpecs)(function (instrument) {
-                    return Control_Monad_Aff_Free.fromAff(Control_Monad_Aff_Free.affableFree(Halogen_Query_HalogenF.affableHalogenF(Control_Monad_Aff_Free.affableAff)))(Control_Bind.bind(Control_Monad_Aff.bindAff)(Network_HTTP_Affjax.get(Network_HTTP_Affjax_Response.responsableArrayBuffer)(instrument.file))(function (v2) {
-                        return Audio.loadSample(v2.response);
-                    }));
-                }))(function (v2) {
+                return Control_Bind.bind(Control_Monad_Free.freeBind)((function () {
+                    var $41 = Data_Array.head(instrumentSets);
+                    if ($41 instanceof Data_Maybe.Just) {
+                        return Control_Monad_Aff_Free.fromAff(Control_Monad_Aff_Free.affableFree(Halogen_Query_HalogenF.affableHalogenF(Control_Monad_Aff_Free.affableAff)))(loadSet($41.value0));
+                    };
+                    if ($41 instanceof Data_Maybe.Nothing) {
+                        return Control_Applicative.pure(Control_Monad_Free.freeApplicative)([  ]);
+                    };
+                    throw new Error("Failed pattern match at Main line 190, column 7 - line 192, column 27: " + [ $41.constructor.name ]);
+                })())(function (v2) {
                     return Control_Bind.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (state) {
-                        var $38 = {};
-                        for (var $39 in state) {
-                            if (state.hasOwnProperty($39)) {
-                                $38[$39] = state[$39];
+                        var $44 = {};
+                        for (var $45 in state) {
+                            if (state.hasOwnProperty($45)) {
+                                $44[$45] = state[$45];
                             };
                         };
-                        $38.sample = new Data_Maybe.Just(v1);
-                        $38.instrumentSamples = new Data_Maybe.Just(v2);
-                        $38.notes = Data_Array.replicate(Data_Array.length(instrumentSpecs))(Data_Array.replicate(16)(false));
-                        return $38;
+                        $44.sample = new Data_Maybe.Just(v1);
+                        $44.instruments = v2;
+                        $44.notes = Data_Array.replicate(Data_Array.length(v2))(Data_Array.replicate(16)(false));
+                        return $44;
                     }))(function () {
                         return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
                     });
@@ -31209,42 +31310,42 @@ var ui = (function () {
         };
         if (v instanceof UpdateTempo) {
             return Control_Bind.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (state) {
-                var $42 = {};
-                for (var $43 in state) {
-                    if (state.hasOwnProperty($43)) {
-                        $42[$43] = state[$43];
+                var $48 = {};
+                for (var $49 in state) {
+                    if (state.hasOwnProperty($49)) {
+                        $48[$49] = state[$49];
                     };
                 };
-                $42.tempo = Data_Maybe.fromMaybe(state.tempo)(Data_Int.fromString(v.value0));
-                return $42;
+                $48.tempo = Data_Maybe.fromMaybe(state.tempo)(Data_Int.fromString(v.value0));
+                return $48;
             }))(function () {
                 return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value1);
             });
         };
         if (v instanceof DecrTempo) {
             return Control_Bind.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (state) {
-                var $47 = {};
-                for (var $48 in state) {
-                    if (state.hasOwnProperty($48)) {
-                        $47[$48] = state[$48];
+                var $53 = {};
+                for (var $54 in state) {
+                    if (state.hasOwnProperty($54)) {
+                        $53[$54] = state[$54];
                     };
                 };
-                $47.tempo = state.tempo - 10;
-                return $47;
+                $53.tempo = state.tempo - 10;
+                return $53;
             }))(function () {
                 return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
             });
         };
         if (v instanceof IncrTempo) {
             return Control_Bind.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (state) {
-                var $51 = {};
-                for (var $52 in state) {
-                    if (state.hasOwnProperty($52)) {
-                        $51[$52] = state[$52];
+                var $57 = {};
+                for (var $58 in state) {
+                    if (state.hasOwnProperty($58)) {
+                        $57[$58] = state[$58];
                     };
                 };
-                $51.tempo = state.tempo + 10 | 0;
-                return $51;
+                $57.tempo = state.tempo + 10 | 0;
+                return $57;
             }))(function () {
                 return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
             });
@@ -31281,33 +31382,23 @@ var ui = (function () {
                     };
                     if (v1.playState instanceof Playing) {
                         return Control_Bind.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (s) {
-                            var $65 = {};
-                            for (var $66 in s) {
-                                if (s.hasOwnProperty($66)) {
-                                    $65[$66] = s[$66];
+                            var $71 = {};
+                            for (var $72 in s) {
+                                if (s.hasOwnProperty($72)) {
+                                    $71[$72] = s[$72];
                                 };
                             };
-                            $65.playState = new Playing((v1.playState.value0 + 1 | 0) % v1.beats);
-                            return $65;
+                            $71.playState = new Playing((v1.playState.value0 + 1 | 0) % v1.beats);
+                            return $71;
                         }))(function () {
-                            if (v1.instrumentSamples instanceof Data_Maybe.Just) {
-                                return Data_Foldable.sequence_(Control_Monad_Free.freeApplicative)(Data_Foldable.foldableArray)(Data_Function.flip(zipWithIndex)(v1.notes)(function (instrument) {
-                                    return function (idx) {
-                                        var $69 = Data_Array.index(v1.instrumentSamples.value0)(idx);
-                                        if ($69 instanceof Data_Maybe.Just) {
-                                            return Control_Applicative.when(Control_Monad_Free.freeApplicative)(isNoteOn(v1.notes)(idx)(v1.playState.value0))(Control_Monad_Aff_Free.fromEff(Control_Monad_Aff_Free.affableFree(Halogen_Query_HalogenF.affableHalogenF(Control_Monad_Aff_Free.affableAff)))(Audio.play($69.value0)));
-                                        };
-                                        if ($69 instanceof Data_Maybe.Nothing) {
-                                            return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(Data_Unit.unit);
-                                        };
-                                        throw new Error("Failed pattern match at Main line 186, column 15 - line 189, column 37: " + [ $69.constructor.name ]);
-                                    };
-                                }));
-                            };
-                            return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(Data_Unit.unit);
+                            return Data_Foldable.sequence_(Control_Monad_Free.freeApplicative)(Data_Foldable.foldableArray)(Data_Function.flip(zipWithIndex)(v1.instruments)(function (instrument) {
+                                return function (idx) {
+                                    return Control_Applicative.when(Control_Monad_Free.freeApplicative)(isNoteOn(v1.notes)(idx)(v1.playState.value0))(Control_Monad_Aff_Free.fromEff(Control_Monad_Aff_Free.affableFree(Halogen_Query_HalogenF.affableHalogenF(Control_Monad_Aff_Free.affableAff)))(Audio.play(instrument.sample)));
+                                };
+                            }));
                         });
                     };
-                    throw new Error("Failed pattern match at Main line 178, column 5 - line 190, column 25: " + [ v1.playState.constructor.name ]);
+                    throw new Error("Failed pattern match at Main line 221, column 5 - line 227, column 83: " + [ v1.playState.constructor.name ]);
                 })())(function () {
                     return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
                 });
@@ -31327,7 +31418,7 @@ var ui = (function () {
                     if (v1.sample instanceof Data_Maybe.Nothing) {
                         return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(Data_Unit.unit);
                     };
-                    throw new Error("Failed pattern match at Main line 198, column 5 - line 200, column 27: " + [ v1.sample.constructor.name ]);
+                    throw new Error("Failed pattern match at Main line 234, column 5 - line 236, column 27: " + [ v1.sample.constructor.name ]);
                 })())(function () {
                     return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
                 });
@@ -31335,14 +31426,14 @@ var ui = (function () {
         };
         if (v instanceof Stop) {
             return Control_Bind.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (state) {
-                var $80 = {};
-                for (var $81 in state) {
-                    if (state.hasOwnProperty($81)) {
-                        $80[$81] = state[$81];
+                var $82 = {};
+                for (var $83 in state) {
+                    if (state.hasOwnProperty($83)) {
+                        $82[$83] = state[$83];
                     };
                 };
-                $80.playState = Stopped.value;
-                return $80;
+                $82.playState = Stopped.value;
+                return $82;
             }))(function () {
                 return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
             });
@@ -31350,29 +31441,29 @@ var ui = (function () {
         if (v instanceof Play) {
             return Control_Bind.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (state) {
                 if (state.playState instanceof Stopped) {
-                    var $85 = {};
-                    for (var $86 in state) {
-                        if (state.hasOwnProperty($86)) {
-                            $85[$86] = state[$86];
+                    var $87 = {};
+                    for (var $88 in state) {
+                        if (state.hasOwnProperty($88)) {
+                            $87[$88] = state[$88];
                         };
                     };
-                    $85.playState = new Playing(0);
-                    return $85;
+                    $87.playState = new Playing(0);
+                    return $87;
                 };
                 if (state.playState instanceof Paused) {
-                    var $88 = {};
-                    for (var $89 in state) {
-                        if (state.hasOwnProperty($89)) {
-                            $88[$89] = state[$89];
+                    var $90 = {};
+                    for (var $91 in state) {
+                        if (state.hasOwnProperty($91)) {
+                            $90[$91] = state[$91];
                         };
                     };
-                    $88.playState = new Playing(state.playState.value0);
-                    return $88;
+                    $90.playState = new Playing(state.playState.value0);
+                    return $90;
                 };
                 if (state.playState instanceof Playing) {
                     return state;
                 };
-                throw new Error("Failed pattern match at Main line 207, column 7 - line 210, column 27: " + [ state.playState.constructor.name ]);
+                throw new Error("Failed pattern match at Main line 243, column 7 - line 246, column 27: " + [ state.playState.constructor.name ]);
             }))(function () {
                 return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
             });
@@ -31380,14 +31471,14 @@ var ui = (function () {
         if (v instanceof Pause) {
             return Control_Bind.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (state) {
                 if (state.playState instanceof Playing) {
-                    var $95 = {};
-                    for (var $96 in state) {
-                        if (state.hasOwnProperty($96)) {
-                            $95[$96] = state[$96];
+                    var $97 = {};
+                    for (var $98 in state) {
+                        if (state.hasOwnProperty($98)) {
+                            $97[$98] = state[$98];
                         };
                     };
-                    $95.playState = new Paused(state.playState.value0);
-                    return $95;
+                    $97.playState = new Paused(state.playState.value0);
+                    return $97;
                 };
                 return state;
             }))(function () {
@@ -31396,14 +31487,14 @@ var ui = (function () {
         };
         if (v instanceof ClearNotes) {
             return Control_Bind.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (state) {
-                var $100 = {};
-                for (var $101 in state) {
-                    if (state.hasOwnProperty($101)) {
-                        $100[$101] = state[$101];
+                var $102 = {};
+                for (var $103 in state) {
+                    if (state.hasOwnProperty($103)) {
+                        $102[$103] = state[$103];
                     };
                 };
-                $100.notes = Data_Functor.map(Data_Functor.functorArray)(Data_Functor.map(Data_Functor.functorArray)(Data_Function["const"](false)))(state.notes);
-                return $100;
+                $102.notes = Data_Functor.map(Data_Functor.functorArray)(Data_Functor.map(Data_Functor.functorArray)(Data_Function["const"](false)))(state.notes);
+                return $102;
             }))(function () {
                 return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
             });
@@ -31411,22 +31502,22 @@ var ui = (function () {
         if (v instanceof ToggleNote) {
             return Control_Bind.bind(Control_Monad_Free.freeBind)(Control_Monad_Aff_Free.fromAff(Control_Monad_Aff_Free.affableFree(Halogen_Query_HalogenF.affableHalogenF(Control_Monad_Aff_Free.affableAff)))(Control_Monad_Aff_Console.log("foo")))(function () {
                 return Control_Bind.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (state) {
-                    var $104 = {};
-                    for (var $105 in state) {
-                        if (state.hasOwnProperty($105)) {
-                            $104[$105] = state[$105];
+                    var $106 = {};
+                    for (var $107 in state) {
+                        if (state.hasOwnProperty($107)) {
+                            $106[$107] = state[$107];
                         };
                     };
-                    $104.notes = Data_Lens_Setter.over(function ($113) {
-                        return Data_Lens_Index.ix(Data_Lens_Index.indexArray)(v.value0)(Data_Lens_Internal_Wander.wanderFunction)(Data_Lens_Index.ix(Data_Lens_Index.indexArray)(v.value1)(Data_Lens_Internal_Wander.wanderFunction)($113));
+                    $106.notes = Data_Lens_Setter.over(function ($115) {
+                        return Data_Lens_Index.ix(Data_Lens_Index.indexArray)(v.value0)(Data_Lens_Internal_Wander.wanderFunction)(Data_Lens_Index.ix(Data_Lens_Index.indexArray)(v.value1)(Data_Lens_Internal_Wander.wanderFunction)($115));
                     })(Data_HeytingAlgebra.not(Data_HeytingAlgebra.heytingAlgebraBoolean))(state.notes);
-                    return $104;
+                    return $106;
                 }))(function () {
                     return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value2);
                 });
             });
         };
-        throw new Error("Failed pattern match at Main line 142, column 3 - line 154, column 14: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at Main line 185, column 3 - line 197, column 14: " + [ v.constructor.name ]);
     };
     return Halogen_Component.component({
         render: render, 
@@ -31461,8 +31552,9 @@ module.exports = {
     ToggleNote: ToggleNote, 
     controlButton: controlButton, 
     initialState: initialState, 
-    instrumentSpecs: instrumentSpecs, 
+    instrumentSets: instrumentSets, 
     isNoteOn: isNoteOn, 
+    loadSet: loadSet, 
     main: main, 
     mainLoop: mainLoop, 
     renderInstrument: renderInstrument, 

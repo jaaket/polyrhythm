@@ -16,8 +16,8 @@ import Control.Monad.Aff.Free (fromAff, fromEff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE)
-import Data.Array (cons, length, range, replicate, take, uncons, (!!))
-import Data.Foldable (sequence_, traverse_)
+import Data.Array (cons, head, length, range, replicate, take, uncons, (!!))
+import Data.Foldable (sequence_)
 import Data.Int (fromString, toNumber)
 import Data.Lens.Index (ix)
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -39,7 +39,7 @@ type State =
   , tempo :: Int
   , sample :: Maybe Sample
   , playState :: PlayState
-  , instrumentSamples :: Maybe (Array Sample)
+  , instruments :: Array Instrument
   , notes :: Array (Array Boolean)
   }
 
@@ -49,7 +49,7 @@ initialState =
   , tempo: 120
   , sample: Nothing
   , playState: Playing 0
-  , instrumentSamples: Nothing
+  , instruments: []
   , notes: []
   }
 
@@ -72,12 +72,55 @@ data Query a
 
 type App eff = Aff (H.HalogenEffects (console :: CONSOLE, ajax :: AJAX, audio :: AUDIO | eff))
 
-instrumentSpecs :: Array { name :: String, file :: String }
-instrumentSpecs =
-  [ { name: "Kick", file: "sounds/kick.wav" }
-  , { name: "Snare", file: "sounds/snare.wav" }
-  , { name: "Metronome", file: "sounds/metronome.wav" }
+type Instrument = { name :: String, sample :: Sample }
+
+type InstrumentSpec = { name :: String, file :: String }
+
+type InstrumentSetSpec = { name :: String, instruments :: Array InstrumentSpec }
+
+instrumentSets :: Array InstrumentSetSpec
+instrumentSets =
+  [ { name: "C64"
+    , instruments:
+        [ { name: "Clap", file: "sounds/c64/clap.wav" }
+        , { name: "Cowbell", file: "sounds/c64/cowbell.wav" }
+        , { name: "Hihat 1", file: "sounds/c64/hihat_1.wav" }
+        , { name: "Hihat 2", file: "sounds/c64/hihat_2.wav" }
+        , { name: "Kick 1", file: "sounds/c64/kick_1.wav" }
+        , { name: "Kick 2", file: "sounds/c64/kick_2.wav" }
+        , { name: "Kick 3", file: "sounds/c64/kick_3.wav" }
+        , { name: "Kick 4", file: "sounds/c64/kick_4.wav" }
+        , { name: "Kick 5", file: "sounds/c64/kick_5.wav" }
+        , { name: "Kick 6", file: "sounds/c64/kick_6.wav" }
+        , { name: "Kick 7", file: "sounds/c64/kick_7.wav" }
+        , { name: "Kick 8", file: "sounds/c64/kick_8.wav" }
+        , { name: "Snare 1", file: "sounds/c64/snare_1.wav" }
+        , { name: "Snare 2", file: "sounds/c64/snare_2.wav" }
+        , { name: "Snare 3", file: "sounds/c64/snare_3.wav" }
+        , { name: "Snare 4", file: "sounds/c64/snare_4.wav" }
+        , { name: "Snare 5", file: "sounds/c64/snare_5.wav" }
+        , { name: "Snare 6", file: "sounds/c64/snare_6.wav" }
+        , { name: "Snare 7", file: "sounds/c64/snare_7.wav" }
+        , { name: "Snare 8", file: "sounds/c64/snare_8.wav" }
+        , { name: "Tom 1", file: "sounds/c64/tom_1.wav" }
+        , { name: "Tom 2", file: "sounds/c64/tom_2.wav" }
+        ]
+    }
+    , { name: "Acoustic"
+      , instruments:
+          [ { name: "Kick", file: "sounds/acoustic/kick.wav" }
+          , { name: "Snare", file: "sounds/acoustic/snare.wav" }
+          , { name: "Hi-hat", file: "sounds/acoustic/hihat.wav" }
+          , { name: "Metronome", file: "sounds/acoustic/metronome.wav" }
+          ]
+    }
   ]
+
+loadSet :: forall eff. InstrumentSetSpec -> Aff (ajax :: AJAX, audio :: AUDIO | eff) (Array Instrument)
+loadSet spec =  flip traverse spec.instruments \instrument -> do
+  sampleData <- get instrument.file
+  sample <- loadSample sampleData.response
+  pure { name: spec.name <> "/" <> instrument.name, sample: sample }
 
 controlButton :: forall a. String -> H.Action Query -> H.HTML a Query
 controlButton iconName act =
@@ -120,9 +163,9 @@ ui = H.component { render, eval }
                     _ -> controlButton "play" Play
                 ]
             , HH.div [ HP.class_ (HH.className "tempo") ]
-                [ HH.button [ HE.onClick (HE.input_ DecrTempo) ] [ HH.text "−10" ]
+                [ HH.button (onMouseDownOrTouchStart DecrTempo) [ HH.text "−10" ]
                 , HH.input [ HF.onValueInput (HE.input UpdateTempo), HP.placeholder (show state.tempo) ]
-                , HH.button [ HE.onClick (HE.input_ IncrTempo) ] [ HH.text "+10" ]
+                , HH.button (onMouseDownOrTouchStart IncrTempo) [ HH.text "+10" ]
                 ]
             , controlButton "trash-o" ClearNotes
             ]
@@ -130,9 +173,9 @@ ui = H.component { render, eval }
             [ HH.table_ $ map (renderInstrument state) (range 0 (length state.notes - 1))
             ]
         , HH.div [ HP.class_ (HH.className "tempo") ]
-            [ HH.button [ HE.onClick (HE.input_ DecrBeats) ] [ HH.text "−" ]
+            [ HH.button (onMouseDownOrTouchStart DecrBeats) [ HH.text "−" ]
             , HH.input [ HF.onValueInput (HE.input UpdateBeats), HP.placeholder (show state.beats) ]
-            , HH.button [ HE.onClick (HE.input_ IncrBeats) ] [ HH.text "+" ]
+            , HH.button (onMouseDownOrTouchStart IncrBeats) [ HH.text "+" ]
             ]
         , HH.p [ HE.onMouseDown (HE.input_ EnableIosAudio) ] [ HH.text "Enable audio (iOs)" ]
         ]
@@ -143,13 +186,13 @@ ui = H.component { render, eval }
     sample <- fromAff $ do
       sampleData <- get "sounds/bd01.wav"
       loadSample sampleData.response
-    instrumentSamples <- flip traverse instrumentSpecs \instrument ->
-      fromAff $ do
-        sampleData <- get instrument.file
-        loadSample sampleData.response
+    instruments <-
+      case head instrumentSets of
+        Just set -> fromAff $ loadSet set
+        Nothing -> pure []
     H.modify \state -> state { sample = Just sample
-                             , instrumentSamples = Just instrumentSamples
-                             , notes = replicate (length instrumentSpecs) (replicate 16 false)
+                             , instruments = instruments
+                             , notes = replicate (length instruments) (replicate 16 false)
                              }
     pure next
   eval (UpdateTempo tempo next) = do
@@ -180,15 +223,8 @@ ui = H.component { render, eval }
       Paused _ -> pure unit
       Playing phase -> do
         H.modify (\s -> s { playState = Playing ((phase + 1) `mod` state.beats) })
-        case state.instrumentSamples of
-          Just samples ->
-            sequence_ $ flip zipWithIndex state.notes \instrument idx ->
-              case samples !! idx of
-                Just sample ->
-                  when (isNoteOn state.notes idx phase) (fromEff $ play sample)
-                Nothing -> pure unit
-          _ -> pure unit
-
+        sequence_ $ flip zipWithIndex state.instruments \instrument idx ->
+          when (isNoteOn state.notes idx phase) (fromEff $ play instrument.sample)
     pure next
   eval (AskTempo k) = do
     state <- H.get
@@ -226,8 +262,10 @@ ui = H.component { render, eval }
 renderInstrument :: State -> Int -> H.ComponentHTML Query
 renderInstrument state instrument =
   HH.tr_ $
-    -- [ HH.td_ [ HH.text name ] ] <>
-    map
+    case state.instruments !! instrument of
+      Just instr -> [ HH.td_ [ HH.text instr.name ] ]
+      Nothing -> []
+    <> map
       (\i -> HH.td
           ([ HP.classes $
               [ HH.className $ if isNoteOn state.notes instrument i then "on" else "off" ]
