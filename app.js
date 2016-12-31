@@ -31130,7 +31130,7 @@ var mainLoop = function (driver) {
                 if (!$26) {
                     return loop(lastTick);
                 };
-                throw new Error("Failed pattern match at Main line 339, column 13 - line 343, column 33: " + [ $26.constructor.name ]);
+                throw new Error("Failed pattern match at Main line 342, column 13 - line 346, column 33: " + [ $26.constructor.name ]);
             });
         });
     };
@@ -31172,7 +31172,7 @@ var renderInstrument = function (state) {
             if ($31 instanceof Data_Maybe.Nothing) {
                 return [  ];
             };
-            throw new Error("Failed pattern match at Main line 311, column 5 - line 313, column 20: " + [ $31.constructor.name ]);
+            throw new Error("Failed pattern match at Main line 314, column 5 - line 316, column 20: " + [ $31.constructor.name ]);
         })())(Data_Functor.map(Data_Functor.functorArray)(function (i) {
             return Halogen_HTML_Elements.td(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ Halogen_HTML_Properties.classes(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ Halogen_HTML_Core.className((function () {
                 var $33 = isNoteOn(state.notes)(instrument)(i);
@@ -31182,7 +31182,7 @@ var renderInstrument = function (state) {
                 if (!$33) {
                     return "off";
                 };
-                throw new Error("Failed pattern match at Main line 317, column 32 - line 317, column 90: " + [ $33.constructor.name ]);
+                throw new Error("Failed pattern match at Main line 320, column 32 - line 320, column 90: " + [ $33.constructor.name ]);
             })()) ])((function () {
                 if (state.playState instanceof Playing) {
                     var $35 = state.playState.value0 === i;
@@ -31192,7 +31192,7 @@ var renderInstrument = function (state) {
                     if (!$35) {
                         return [  ];
                     };
-                    throw new Error("Failed pattern match at Main line 320, column 23 - line 322, column 32: " + [ $35.constructor.name ]);
+                    throw new Error("Failed pattern match at Main line 323, column 23 - line 325, column 32: " + [ $35.constructor.name ]);
                 };
                 if (state.playState instanceof Paused) {
                     var $37 = state.playState.value0 === i;
@@ -31202,12 +31202,12 @@ var renderInstrument = function (state) {
                     if (!$37) {
                         return [  ];
                     };
-                    throw new Error("Failed pattern match at Main line 324, column 23 - line 326, column 32: " + [ $37.constructor.name ]);
+                    throw new Error("Failed pattern match at Main line 327, column 23 - line 329, column 32: " + [ $37.constructor.name ]);
                 };
                 if (state.playState instanceof Stopped) {
                     return [  ];
                 };
-                throw new Error("Failed pattern match at Main line 318, column 18 - line 327, column 34: " + [ state.playState.constructor.name ]);
+                throw new Error("Failed pattern match at Main line 321, column 18 - line 330, column 34: " + [ state.playState.constructor.name ]);
             })())) ])(HalogenUtil.onMouseDownOrTouchStart(ToggleNote.create(instrument)(i))))([  ]);
         })(Data_Array.range(0)(state.beats - 1))));
     };
@@ -31318,7 +31318,7 @@ var ui = (function () {
                 return controlButton("pause")(Pause.create);
             };
             return controlButton("play")(Play.create);
-        })() ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("tempo")) ])([ Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(DecrTempo.create))([ Halogen_HTML.text("\u221210") ]), Halogen_HTML_Elements.input([ Halogen_HTML_Events_Forms.onValueInput(Halogen_HTML_Events.input(UpdateTempo.create)), Halogen_HTML_Properties.placeholder(Data_Show.show(Data_Show.showInt)(state.tempo)) ]), Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(IncrTempo.create))([ Halogen_HTML.text("+10") ]) ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("tempo")) ])([ Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(DecrBeats.create))([ Halogen_HTML.text("\u2212") ]), Halogen_HTML_Elements.input([ Halogen_HTML_Events_Forms.onValueInput(Halogen_HTML_Events.input(UpdateBeats.create)), Halogen_HTML_Properties.placeholder(Data_Show.show(Data_Show.showInt)(state.beats)) ]), Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(IncrBeats.create))([ Halogen_HTML.text("+") ]) ]), controlButton("trash-o")(ClearNotes.create) ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("controls")) ])([ Halogen_HTML_Elements.table_(Data_Functor.map(Data_Functor.functorArray)(renderInstrument(state))(Data_Array.range(0)(Data_Array.length(state.notes) - 1))) ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("controls")) ])([ controlButton("plus")(OpenModal.create) ]), Halogen_HTML_Elements.p([ Halogen_HTML_Events.onMouseDown(Halogen_HTML_Events.input_(EnableIosAudio.create)) ])([ Halogen_HTML.text("Enable audio (iOs)") ]) ]) ])((function () {
+        })() ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("tempo")) ])([ Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(DecrTempo.create))([ Halogen_HTML.text("\u221210") ]), Halogen_HTML_Elements.input([ Halogen_HTML_Events_Forms.onValueInput(Halogen_HTML_Events.input(UpdateTempo.create)), Halogen_HTML_Properties.placeholder(Data_Show.show(Data_Show.showInt)(state.tempo)) ]), Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(IncrTempo.create))([ Halogen_HTML.text("+10") ]) ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("tempo")) ])([ Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(DecrBeats.create))([ Halogen_HTML.text("\u2212") ]), Halogen_HTML_Elements.input([ Halogen_HTML_Events_Forms.onValueInput(Halogen_HTML_Events.input(UpdateBeats.create)), Halogen_HTML_Properties.placeholder(Data_Show.show(Data_Show.showInt)(state.beats)) ]), Halogen_HTML_Elements.button(HalogenUtil.onMouseDownOrTouchStart(IncrBeats.create))([ Halogen_HTML.text("+") ]) ]), controlButton("trash-o")(ClearNotes.create), Halogen_HTML_Elements.span(Data_Semigroup.append(Data_Semigroup.semigroupArray)(HalogenUtil.onMouseDownOrTouchStart(EnableIosAudio.create))([ Halogen_HTML_Properties.classes([ Halogen_HTML_Core.className("fa-stack"), Halogen_HTML_Core.className("fa-lg") ]), Halogen_HTML_Properties.title("Enable audio on iOs") ]))([ Halogen_HTML_Elements.i([ Halogen_HTML_Properties.classes([ Halogen_HTML_Core.className("fa"), Halogen_HTML_Core.className("fa-apple"), Halogen_HTML_Core.className("fa-stack-2x") ]) ])([  ]), Halogen_HTML_Elements.i([ Halogen_HTML_Properties.classes([ Halogen_HTML_Core.className("fa"), Halogen_HTML_Core.className("fa-volume-up"), Halogen_HTML_Core.className("fa-stack-1x"), Halogen_HTML_Core.className("fa-inverse") ]) ])([  ]) ]) ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("controls")) ])([ Halogen_HTML_Elements.table_(Data_Functor.map(Data_Functor.functorArray)(renderInstrument(state))(Data_Array.range(0)(Data_Array.length(state.notes) - 1))) ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("controls")) ])([ controlButton("plus")(OpenModal.create) ]) ]) ])((function () {
             if (state.modalOpen) {
                 return [ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("modal")) ])([ Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("modal-body")) ])([ Halogen_HTML_Elements.table_(Data_Function.flip(Data_Array.concatMap)(instrumentSets)(function (is) {
                     return Data_Function.flip(Data_Functor.map(Data_Functor.functorArray))(is.instruments)(function (i) {
@@ -31329,7 +31329,7 @@ var ui = (function () {
             if (!state.modalOpen) {
                 return [  ];
             };
-            throw new Error("Failed pattern match at Main line 194, column 7 - line 210, column 16: " + [ state.modalOpen.constructor.name ]);
+            throw new Error("Failed pattern match at Main line 197, column 7 - line 213, column 16: " + [ state.modalOpen.constructor.name ]);
         })()));
     };
     var $$eval = function (v) {
@@ -31345,7 +31345,7 @@ var ui = (function () {
                     if ($45 instanceof Data_Maybe.Nothing) {
                         return Control_Applicative.pure(Control_Monad_Free.freeApplicative)([  ]);
                     };
-                    throw new Error("Failed pattern match at Main line 218, column 7 - line 220, column 27: " + [ $45.constructor.name ]);
+                    throw new Error("Failed pattern match at Main line 221, column 7 - line 223, column 27: " + [ $45.constructor.name ]);
                 })())(function (v2) {
                     return Control_Bind.bind(Control_Monad_Free.freeBind)(Halogen_Query.modify(function (state) {
                         var $48 = {};
@@ -31454,7 +31454,7 @@ var ui = (function () {
                             }));
                         });
                     };
-                    throw new Error("Failed pattern match at Main line 249, column 5 - line 255, column 83: " + [ v1.playState.constructor.name ]);
+                    throw new Error("Failed pattern match at Main line 252, column 5 - line 258, column 83: " + [ v1.playState.constructor.name ]);
                 })())(function () {
                     return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
                 });
@@ -31474,7 +31474,7 @@ var ui = (function () {
                     if (v1.sample instanceof Data_Maybe.Nothing) {
                         return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(Data_Unit.unit);
                     };
-                    throw new Error("Failed pattern match at Main line 262, column 5 - line 264, column 27: " + [ v1.sample.constructor.name ]);
+                    throw new Error("Failed pattern match at Main line 265, column 5 - line 267, column 27: " + [ v1.sample.constructor.name ]);
                 })())(function () {
                     return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
                 });
@@ -31519,7 +31519,7 @@ var ui = (function () {
                 if (state.playState instanceof Playing) {
                     return state;
                 };
-                throw new Error("Failed pattern match at Main line 271, column 7 - line 274, column 27: " + [ state.playState.constructor.name ]);
+                throw new Error("Failed pattern match at Main line 274, column 7 - line 277, column 27: " + [ state.playState.constructor.name ]);
             }))(function () {
                 return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
             });
@@ -31627,7 +31627,7 @@ var ui = (function () {
                 return Control_Applicative.pure(Control_Monad_Free.freeApplicative)(v.value0);
             });
         };
-        throw new Error("Failed pattern match at Main line 213, column 3 - line 225, column 14: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at Main line 216, column 3 - line 228, column 14: " + [ v.constructor.name ]);
     };
     return Halogen_Component.component({
         render: render, 

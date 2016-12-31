@@ -182,13 +182,16 @@ ui = H.component { render, eval }
                 , HH.button (onMouseDownOrTouchStart IncrBeats) [ HH.text "+" ]
                 ]
             , controlButton "trash-o" ClearNotes
+            , HH.span (onMouseDownOrTouchStart EnableIosAudio <> [ HP.classes [ HH.className "fa-stack", HH.className "fa-lg" ], HP.title "Enable audio on iOs" ])
+                [ HH.i [ HP.classes [ HH.className "fa", HH.className "fa-apple", HH.className "fa-stack-2x" ] ] []
+                , HH.i [ HP.classes [ HH.className "fa", HH.className "fa-volume-up", HH.className "fa-stack-1x", HH.className "fa-inverse" ] ] []
+                ]
             ]
         , HH.div [ HP.class_ (HH.className "controls") ]
             [ HH.table_ $ map (renderInstrument state) (range 0 (length state.notes - 1))
             ]
         , HH.div [ HP.class_ (HH.className "controls") ]
             [ controlButton "plus" OpenModal ]
-        , HH.p [ HE.onMouseDown (HE.input_ EnableIosAudio) ] [ HH.text "Enable audio (iOs)" ]
         ]
       ] <>
       if state.modalOpen
