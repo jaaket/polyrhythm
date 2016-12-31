@@ -194,14 +194,16 @@ ui = H.component { render, eval }
       if state.modalOpen
         then
           [ HH.div [ HP.class_ (HH.className "modal") ]
-              [ HH.table_ $ flip concatMap instrumentSets (\is -> flip map is.instruments \i ->
-                  HH.tr_
-                    [ HH.td_ [ HH.text is.name ]
-                    , HH.td_ [ HH.text i.name ]
-                    , HH.td_ [ HH.i (onMouseDownOrTouchStart (PlaySample i.file) <> [ HP.classes [ HH.className "fa", HH.className "fa-volume-up" ] ]) [] ]
-                    , HH.td_ [ HH.i (onMouseDownOrTouchStart (AddInstrument i) <> [ HP.classes [ HH.className "fa", HH.className "fa-plus" ] ]) [] ]
-                    ]
-                )
+              [ HH.div [ HP.class_ (HH.className "modal-body") ]
+                [ HH.table_ $ flip concatMap instrumentSets (\is -> flip map is.instruments \i ->
+                    HH.tr_
+                      [ HH.td_ [ HH.text is.name ]
+                      , HH.td_ [ HH.text i.name ]
+                      , HH.td_ [ HH.i (onMouseDownOrTouchStart (PlaySample i.file) <> [ HP.classes [ HH.className "fa", HH.className "fa-2x", HH.className "fa-volume-up" ] ]) [] ]
+                      , HH.td_ [ HH.i (onMouseDownOrTouchStart (AddInstrument i) <> [ HP.classes [ HH.className "fa", HH.className "fa-2x", HH.className "fa-plus" ] ]) [] ]
+                      ]
+                  )
+                ]
               ]
           , HH.div ([ HP.class_ (HH.className "modal-background") ] <> onMouseDownOrTouchStart CloseModal) []
           ]
