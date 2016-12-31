@@ -31324,7 +31324,7 @@ var ui = (function () {
                     return Data_Function.flip(Data_Functor.map(Data_Functor.functorArray))(is.instruments)(function (i) {
                         return Halogen_HTML_Elements.tr_([ Halogen_HTML_Elements.td_([ Halogen_HTML.text(is.name) ]), Halogen_HTML_Elements.td_([ Halogen_HTML.text(i.name) ]), Halogen_HTML_Elements.td_([ Halogen_HTML_Elements.i(Data_Semigroup.append(Data_Semigroup.semigroupArray)(HalogenUtil.onMouseDownOrTouchStart(PlaySample.create(i.file)))([ Halogen_HTML_Properties.classes([ Halogen_HTML_Core.className("fa"), Halogen_HTML_Core.className("fa-2x"), Halogen_HTML_Core.className("fa-volume-up") ]) ]))([  ]) ]), Halogen_HTML_Elements.td_([ Halogen_HTML_Elements.i(Data_Semigroup.append(Data_Semigroup.semigroupArray)(HalogenUtil.onMouseDownOrTouchStart(AddInstrument.create(i)))([ Halogen_HTML_Properties.classes([ Halogen_HTML_Core.className("fa"), Halogen_HTML_Core.className("fa-2x"), Halogen_HTML_Core.className("fa-plus") ]) ]))([  ]) ]) ]);
                     });
-                })) ]) ]), Halogen_HTML_Elements.div(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("modal-background")) ])(HalogenUtil.onMouseDownOrTouchStart(CloseModal.create)))([  ]) ];
+                })) ]) ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_(Halogen_HTML_Core.className("modal-background")), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(CloseModal.create)) ])([  ]) ];
             };
             if (!state.modalOpen) {
                 return [  ];

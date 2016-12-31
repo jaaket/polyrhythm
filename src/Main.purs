@@ -205,7 +205,7 @@ ui = H.component { render, eval }
                   )
                 ]
               ]
-          , HH.div ([ HP.class_ (HH.className "modal-background") ] <> onMouseDownOrTouchStart CloseModal) []
+          , HH.div [ HP.class_ (HH.className "modal-background"), HE.onClick (HE.input_ CloseModal) ] []
           ]
         else []
 
