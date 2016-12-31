@@ -253,9 +253,10 @@ ui = H.component { render, eval }
       Stopped -> pure unit
       Paused _ -> pure unit
       Playing phase -> do
-        H.modify (\s -> s { playState = Playing ((phase + 1) `mod` state.beats) })
+        let newPhase = (phase + 1) `mod` state.beats
+        H.modify (\s -> s { playState = Playing newPhase })
         sequence_ $ flip zipWithIndex state.instruments \instrument idx ->
-          when (isNoteOn state.notes idx phase) (fromEff $ play instrument.sample)
+          when (isNoteOn state.notes idx newPhase) (fromEff $ play instrument.sample)
     pure next
   eval (AskTempo k) = do
     state <- H.get
@@ -286,7 +287,6 @@ ui = H.component { render, eval }
     H.modify \state -> state { notes = map (map (const false)) state.notes }
     pure next
   eval (ToggleNote instrument note next) = do
-    fromAff $ log "foo"
     H.modify \state -> state { notes = ix instrument <<< ix note %~ not $ state.notes }
     pure next
   eval (PlaySample location next) = do
