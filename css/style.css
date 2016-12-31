@@ -104,7 +104,8 @@ button {
   border-radius: 4px;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
   align-items: center;
   z-index: 2;
   top: 50%;
